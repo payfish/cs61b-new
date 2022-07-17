@@ -138,9 +138,9 @@ public class Model extends Observable {
      * */
     public static boolean emptySpaceExists(Board b) {
         // TODO: Fill in this function.
-        for(int i = 0; i < 4; i += 1){
-            for (int j = 0; j < 4; j += 1){
-                if(b.tile(i,j)==null)
+        for(int i = 0; i < b.size(); i += 1){
+            for (int j = 0; j < b.size(); j += 1){
+                if(b.tile(i, j) == null)
                     return true;
             }
         }
@@ -154,6 +154,17 @@ public class Model extends Observable {
      */
     public static boolean maxTileExists(Board b) {
         // TODO: Fill in this function.
+        int maxNum = 0;
+        for(int i = 0; i < b.size(); i += 1){
+            for (int j = 0; j < b.size(); j += 1){
+                Tile t = b.tile(i, j);
+                if(t != null && t.value() == MAX_PIECE)
+                    /** thought MAX_PIECE should only be one,apparently I was wrong */
+//                  maxNum += 1;
+                    return true;
+            }
+        }
+//      if(maxNum == 1)
         return false;
     }
 
@@ -165,8 +176,18 @@ public class Model extends Observable {
      */
     public static boolean atLeastOneMoveExists(Board b) {
         // TODO: Fill in this function.
+        if(emptySpaceExists(b))
+            return true;
+        for(int i = 0; i < b.size(); i += 1){
+            for (int j = 0; j < b.size(); j += 1){
+                Tile t = b.tile(i, j);
+                if(i+1 < b.size() && t.value() == b.tile(i+1,j).value() || j+1 < b.size() && t.value() == b.tile(i,j+1).value())
+                    return true;
+            }
+        }
         return false;
     }
+
 
 
     @Override
