@@ -5,7 +5,7 @@ import java.util.Observable;
 
 
 /** The state of a game of 2048.
- *  @author TODO: YOUR NAME HERE
+ *  @author PAYFISH
  */
 public class Model extends Observable {
     /** Current contents of the board. */
@@ -94,7 +94,7 @@ public class Model extends Observable {
         setChanged();
     }
 
-    /** Tilt the board toward SIDE. Return true iff this changes the board.
+    /** Tilt the board toward SIDE. Return true if this changes the board.
      *
      * 1. If two Tile objects are adjacent in the direction of motion and have
      *    the same value, they are merged into one Tile of twice the original
@@ -107,19 +107,47 @@ public class Model extends Observable {
      *    and the trailing tile does not.
      * */
     public boolean tilt(Side side) {
+        board.setViewingPerspective(side);
         boolean changed;
         changed = false;
-
+        int n = board.size();
+        for(int c = 0; c < n; c += 1){
+            int idx = n-1;
+            for (int r = n - 2; r >= 0 ; r -= 1){
+                Tile t = board.tile(c, r);
+                Tile top = board.tile(c, idx);
+                if(t != null) {
+                    if (top != null && t.value() == top.value()) {
+                        board.move(c, idx, t);
+                        score += 2 * t.value();
+                        changed = true;
+                        idx -= 1;
+                    }else if(top == null){
+                        board.move(c, idx, t);
+                        changed = true;
+                    }else{
+                        idx -= 1;
+                        if(board.tile(c, idx) == null){
+                            board.move(c, idx, t);
+                            changed = true;
+                        }
+                    }
+                }
+            }
+        }
         // TODO: Modify this.board (and perhaps this.score) to account
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
-
         checkGameOver();
         if (changed) {
             setChanged();
         }
+        board.setViewingPerspective(Side.NORTH);
+
         return changed;
     }
+
+
 
     /** Checks if the game is over and sets the gameOver variable
      *  appropriately.
@@ -138,9 +166,9 @@ public class Model extends Observable {
      * */
     public static boolean emptySpaceExists(Board b) {
         // TODO: Fill in this function.
-        for(int i = 0; i < b.size(); i += 1){
-            for (int j = 0; j < b.size(); j += 1){
-                if(b.tile(i, j) == null)
+        for(int c = 0; c < b.size(); c += 1){
+            for (int r = 0; r < b.size(); r += 1){
+                if(b.tile(c, r) == null)
                     return true;
             }
         }
@@ -155,9 +183,9 @@ public class Model extends Observable {
     public static boolean maxTileExists(Board b) {
         // TODO: Fill in this function.
         int maxNum = 0;
-        for(int i = 0; i < b.size(); i += 1){
-            for (int j = 0; j < b.size(); j += 1){
-                Tile t = b.tile(i, j);
+        for(int c = 0; c < b.size(); c += 1){
+            for (int r = 0; r < b.size(); r += 1){
+                Tile t = b.tile(c, r);
                 if(t != null && t.value() == MAX_PIECE)
                     /** thought MAX_PIECE should only be one,apparently I was wrong */
 //                  maxNum += 1;
@@ -178,10 +206,10 @@ public class Model extends Observable {
         // TODO: Fill in this function.
         if(emptySpaceExists(b))
             return true;
-        for(int i = 0; i < b.size(); i += 1){
-            for (int j = 0; j < b.size(); j += 1){
-                Tile t = b.tile(i, j);
-                if(i+1 < b.size() && t.value() == b.tile(i+1,j).value() || j+1 < b.size() && t.value() == b.tile(i,j+1).value())
+        for(int c = 0; c < b.size(); c += 1){
+            for (int r = 0; r < b.size(); r += 1){
+                Tile t = b.tile(c, r);
+                if(c+1 < b.size() && t.value() == b.tile(c+1,r).value() || r+1 < b.size() && t.value() == b.tile(c,r+1).value())
                     return true;
             }
         }
