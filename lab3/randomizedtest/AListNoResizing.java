@@ -1,5 +1,7 @@
 package randomizedtest;
 
+import java.util.Arrays;
+
 /** Array based list.
  *  @author Josh Hug
  */
@@ -51,5 +53,10 @@ public class AListNoResizing<Item> {
         items[size - 1] = null;
         size = size - 1;
         return x;
+    }
+
+    @Override
+    public String toString() {
+        return Arrays.toString(items);
     }
 }

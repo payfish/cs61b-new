@@ -1,5 +1,7 @@
 package randomizedtest;
 
+import java.util.Arrays;
+
 /** Array based list.
  *  @author Josh Hug
  */
@@ -60,11 +62,17 @@ public class BuggyAList<Item> {
       * returns deleted item. */
     public Item removeLast() {
         if ((size < items.length / 4) && (size > 4)) {
-            resize(size / 4);
+            /** Replace the size with the items.length since size / 4 may cause the IndexOutOfBounds Exception*/
+            resize(items.length / 4);
         }
         Item x = getLast();
         items[size - 1] = null;
         size = size - 1;
         return x;
+    }
+
+    @Override
+    public String toString() {
+        return Arrays.toString(items);
     }
 }

@@ -15,17 +15,20 @@ public class SLList<Item> {
 
 	/* The first item (if it exists) is at sentinel.next. */
 	private IntNode sentinel;
+	private IntNode last;
 	private int size;
 
 	/** Creates an empty timingtest.SLList. */
 	public SLList() {
 		sentinel = new IntNode(null, null);
+		last = sentinel;
 		size = 0;
 	}
 
 	public SLList(Item x) {
 		sentinel = new IntNode(null, null);
 		sentinel.next = new IntNode(x, null);
+		last = sentinel.next;
 		size = 1;
 	}
 
@@ -52,18 +55,13 @@ public class SLList<Item> {
 		}
 
 		p.next = new IntNode(x, null);
+		last = p.next;
 	}
 
 	/** returns last item in the list */
+	/** changed getLast() so that it returns last item of the list in constant time */
 	public Item getLast() {
-		IntNode p = sentinel;
-
-		/* Advance p to the end of the list. */
-		while (p.next != null) {
-			p = p.next;
-		}
-
-		return p.item;
+		return last.item;
 	}
 
 
@@ -76,6 +74,9 @@ public class SLList<Item> {
 		/* Creates a list of one integer, namely 10 */
 		SLList L = new SLList();
 		L.addLast(20);
+		L.addFirst(10);
+		L.addLast(30);
 		System.out.println(L.size());
+		System.out.println(L.getLast());
 	}
 }
