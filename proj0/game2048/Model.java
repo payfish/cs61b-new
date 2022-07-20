@@ -176,7 +176,6 @@ public class Model extends Observable {
                     empty_space_exists = true;
                     break;
                 }
-
             }
         }
         return empty_space_exists;
