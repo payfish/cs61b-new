@@ -1,0 +1,53 @@
+package deque;
+
+public class ArrayDeque<T> implements Deque<T> {
+
+    private T[] array;
+    private int size;
+
+
+    public ArrayDeque() {
+        array = (T[]) new Object[8];
+        size = 0;
+    }
+
+    @Override
+    public void addFirst(T item) {
+
+    }
+
+    @Override
+    public void addLast(T item) {
+
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return false;
+    }
+
+    @Override
+    public int size() {
+        return 0;
+    }
+
+    @Override
+    public void printDeque() {
+
+    }
+
+    @Override
+    public T removeFirst() {
+        return null;
+    }
+
+    @Override
+    public T removeLast() {
+        return null;
+    }
+
+    @Override
+    public T get(int index) {
+        return null;
+    }
+}
