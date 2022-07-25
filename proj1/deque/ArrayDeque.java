@@ -2,33 +2,72 @@ package deque;
 
 public class ArrayDeque<T> implements Deque<T> {
 
-    private T[] array;
+    private T[] items;
     private int size;
+    private int nextFirst;
+    private int nextLast;
 
 
     public ArrayDeque() {
-        array = (T[]) new Object[8];
+        items = (T[]) new Object[8];
         size = 0;
+        nextFirst = 7;
+        nextLast = 0;
     }
 
     @Override
     public void addFirst(T item) {
+
+        if(nextFirst == nextLast) {
+            resize(size * 2);
+        }
+        int n = items.length;
+        items[nextFirst] = item;
+        nextFirst = (nextFirst + n - 1) % n;
+        size += 1;
+
+    }
+
+    public void resize(int i) {
+        T[] a = (T[]) new Object[i];
+        if(i > items.length){
+
+            System.arraycopy(items, 0, a, 0, nextLast);
+            System.arraycopy(items, nextFirst + 1, a, i - (size - nextLast), size - nextLast);
+            nextFirst = i - size + nextLast - 1;
+            items = a;
+
+        }else{
+
+            System.arraycopy(items, 0, a, 0, nextLast);
+            System.arraycopy(items, nextFirst + 1, a, i - size + nextLast - 1, size - nextLast);
+            nextFirst = i - size + nextLast - 1;
+            items = a;
+        }
 
     }
 
     @Override
     public void addLast(T item) {
 
+        if(nextFirst == nextLast) {
+            resize(size * 2);
+        }
+        int n = items.length;
+        items[nextLast] = item;
+        nextLast = (nextLast + n + 1) % n;
+        size += 1;
+
     }
 
     @Override
     public boolean isEmpty() {
-        return false;
+        return size == 0;
     }
 
     @Override
     public int size() {
-        return 0;
+        return size;
     }
 
     @Override
@@ -38,16 +77,38 @@ public class ArrayDeque<T> implements Deque<T> {
 
     @Override
     public T removeFirst() {
-        return null;
+        if ((size < items.length / 4) && (size > 4)) {
+            /** Replace the size with the items.length since size / 4 may cause the IndexOutOfBounds Exception*/
+            resize(items.length / 4);
+        }
+        if(size == 0)
+            return null;
+        int i = (++nextFirst  + items.length) % items.length;
+        T x = get(i);
+        items[i] = null;
+        size = size - 1;
+        return x;
     }
 
     @Override
     public T removeLast() {
-        return null;
+        if ((size < items.length / 4) && (size > 4)) {
+            /** Replace the size with the items.length since size / 4 may cause the IndexOutOfBounds Exception*/
+            resize(items.length / 4);
+        }
+        if(size == 0)
+            return null;
+        int i = (--nextLast  + items.length) % items.length;
+        T x = get(i);
+        items[i] = null;
+        size = size - 1;
+        return x;
     }
 
     @Override
     public T get(int index) {
-        return null;
+        if(index >= items.length || index < 0)
+            return null;
+        return items[index];
     }
 }
