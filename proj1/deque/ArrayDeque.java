@@ -7,18 +7,23 @@ public class ArrayDeque<T> implements Deque<T> {
     private int nextFirst;
     private int nextLast;
 
-
+    /**
+     * constructor
+     */
     public ArrayDeque() {
+
         items = (T[]) new Object[8];
         size = 0;
         nextFirst = 7;
         nextLast = 0;
+
     }
 
     @Override
     public void addFirst(T item) {
 
         if(nextFirst == nextLast) {
+            /* at least size + 2 once a time */
             resize(size * 2);
         }
         int n = items.length;
@@ -28,22 +33,19 @@ public class ArrayDeque<T> implements Deque<T> {
 
     }
 
+    /**
+     * resize method for add operation
+     * @param i
+     */
     public void resize(int i) {
+
         T[] a = (T[]) new Object[i];
-        if(i > items.length){
+        int t = (nextFirst + 1 + items.length) % items.length;
 
-            System.arraycopy(items, 0, a, 0, nextLast);
-            System.arraycopy(items, nextFirst + 1, a, i - (size - nextLast), size - nextLast);
-            nextFirst = i - size + nextLast - 1;
-            items = a;
-
-        }else{
-
-            System.arraycopy(items, 0, a, 0, nextLast);
-            System.arraycopy(items, nextFirst + 1, a, i - size + nextLast - 1, size - nextLast);
-            nextFirst = i - size + nextLast - 1;
-            items = a;
-        }
+        System.arraycopy(items, 0, a, 0, nextLast);
+        System.arraycopy(items, t, a, i - (size - nextLast), size - nextLast);
+        nextFirst = i - size + nextLast - 1;
+        items = a;
 
     }
 
@@ -60,10 +62,6 @@ public class ArrayDeque<T> implements Deque<T> {
 
     }
 
-    @Override
-    public boolean isEmpty() {
-        return size == 0;
-    }
 
     @Override
     public int size() {
@@ -72,7 +70,12 @@ public class ArrayDeque<T> implements Deque<T> {
 
     @Override
     public void printDeque() {
-
+        int i = nextFirst + 1;
+        while(i != nextLast) {
+            System.out.print(items[i] + " ");
+            i = (i + 1 + items.length) % items.length;
+        }
+        System.out.println(" ");
     }
 
     @Override
