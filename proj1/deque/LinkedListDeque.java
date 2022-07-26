@@ -7,6 +7,7 @@ public class LinkedListDeque <T> implements Deque <T>  {
     private int size;
     private final listnode<T> sentinel;
 
+
     /**
      * class of each LinkedListDeque node
      * @param <T>
@@ -22,6 +23,7 @@ public class LinkedListDeque <T> implements Deque <T>  {
     }
 
     public LinkedListDeque() {
+
         sentinel = new listnode<>(null);
         sentinel.next = sentinel;
         sentinel.pre = sentinel;
@@ -107,13 +109,31 @@ public class LinkedListDeque <T> implements Deque <T>  {
         return idx.item;
     }
 
+
+    private class LinkedListIterator implements Iterator<T> {
+
+        private listnode<T> nextNode = sentinel.next;
+
+        @Override
+        public boolean hasNext() {
+            return nextNode != sentinel;
+        }
+
+        @Override
+        public T next() {
+            T returnItem = nextNode.item;
+            nextNode = nextNode.next;
+            return returnItem;
+        }
+    }
     /**
      *
      * @return
      */
     public Iterator<T> iterator() {
-        return null;
+        return new LinkedListIterator();
     }
+
 
     /**
      *
@@ -121,6 +141,25 @@ public class LinkedListDeque <T> implements Deque <T>  {
      * @return
      */
     public boolean equals(Object o) {
+        if (!(o instanceof LinkedListDeque)) {
+            return false;
+        }
+        if (this == o || this == null && o == null) {
+            return true;
+        }
+
+        LinkedListDeque<T> other = (LinkedListDeque<T>) o;
+        if (this.size != other.size()) {
+            return false;
+        }
+
+        Iterator<T> iterator = this.iterator();
+        Iterator<T> iterator1 = other.iterator();
+        while (iterator.hasNext()) {
+            if(iterator.next() != iterator1.next()) {
+                return false;
+            }
+        }
         return true;
     }
 
@@ -133,7 +172,7 @@ public class LinkedListDeque <T> implements Deque <T>  {
         if(index > size || index < 0) {
             return null;
         }
-        return getrecursive(index, sentinel.next);
+        return recursive(index, sentinel.next);
     }
 
     /**
@@ -142,11 +181,11 @@ public class LinkedListDeque <T> implements Deque <T>  {
      * @param ln
      * @return
      */
-    public T getrecursive(int index, listnode<T> ln) {
+    public T recursive(int index, listnode<T> ln) {
         if(index == 0) {
             return ln.item;
         }
-        return getrecursive(index - 1, ln.next);
+        return recursive(index - 1, ln.next);
     }
 
 }

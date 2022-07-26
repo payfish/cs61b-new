@@ -37,7 +37,7 @@ public class ArrayDeque<T> implements Deque<T> {
      * resize method for add operation
      * @param i
      */
-    public void resize(int i) {
+    private void resize(int i) {
 
         T[] a = (T[]) new Object[i];
         int t = (nextFirst + 1 + items.length) % items.length;
