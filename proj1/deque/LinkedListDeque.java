@@ -127,7 +127,7 @@ public class LinkedListDeque <T> implements Deque <T>  {
         }
     }
     /**
-     *
+     * iterator for LinkedListDeque
      * @return
      */
     public Iterator<T> iterator() {
@@ -136,7 +136,7 @@ public class LinkedListDeque <T> implements Deque <T>  {
 
 
     /**
-     *
+     * if object o equals this Deque totally, return true.
      * @param o
      * @return
      */
@@ -149,6 +149,10 @@ public class LinkedListDeque <T> implements Deque <T>  {
         }
 
         LinkedListDeque<T> other = (LinkedListDeque<T>) o;
+
+        if(this.getClass() != other.getClass()) {
+            return false;
+        }
         if (this.size != other.size()) {
             return false;
         }

@@ -1,8 +1,10 @@
 package deque;
 
 
-import jh61b.junit.In;
 import org.junit.Test;
+
+import java.util.Iterator;
+
 import static org.junit.Assert.*;
 
 public class ArrayDequeTest {
@@ -122,6 +124,46 @@ public class ArrayDequeTest {
 //        for (double i = 999999; i > 500000; i--) {
 //            assertEquals("Should have the same value", i, (double) lld1.removeLast(), 0.0);
 //        }
+
+    }
+
+    @Test
+    public void iteratorTest() {
+
+        ArrayDeque<Integer> arrd1 = new ArrayDeque<>();
+        arrd1.addFirst(3);
+        arrd1.addFirst(4);
+        arrd1.addLast(5);
+        arrd1.addLast(6);
+        StringBuffer sb = new StringBuffer("{");
+        Iterator<Integer> lls = arrd1.iterator();
+        while (lls.hasNext()) {
+            sb.append(lls.next());
+            sb.append(",");
+        }
+        sb.append("}");
+        System.out.println(sb.toString());
+
+    }
+    @Test
+    public void equalsTest() {
+
+        ArrayDeque<Integer> arrd1 = new ArrayDeque<>();
+        ArrayDeque<Integer> arrd2 = new ArrayDeque<>();
+        ArrayDeque<String> arrd3 = new ArrayDeque<>();
+
+        arrd1.addFirst(3);
+        arrd1.addFirst(4);
+
+        arrd2.addFirst(3);
+        arrd2.addFirst(4);
+        arrd2.addFirst(7);
+
+        arrd3.addFirst("3");
+        arrd3.addFirst("4");
+
+        assertFalse(arrd1.equals(arrd2));
+        assertFalse(arrd1.equals(arrd3));
 
     }
 }
