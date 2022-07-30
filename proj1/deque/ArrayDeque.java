@@ -4,29 +4,48 @@ import java.util.Iterator;
 
 public class ArrayDeque<T> implements Deque<T> {
 
+    /**
+     * Good idea to set these parameters to final,learnt from goat @xiaotian
+     */
+    private final int INITIAL_SIZE = 8;
+    private final int ZOOM_FACTOR = 2;
+
     private T[] items;
     private int size;
     private int nextFirst;
     private int nextLast;
 
-    /**
-     * constructor
-     */
+
     public ArrayDeque() {
 
-        items = (T[]) new Object[8];
+        items = (T[]) new Object[INITIAL_SIZE];
         size = 0;
-        nextFirst = 7;
+        nextFirst = INITIAL_SIZE - 1;
         nextLast = 0;
 
     }
 
+    /**
+     * get the first item of the deque.
+     * @return item
+     */
+    public T getFirst() {
+        if(size == 0) {
+            return null;
+        }
+        return items[(nextFirst + 1) % items.length];
+    }
+
+    /**
+     * Adds one item of type T to the front of the deque.
+     * @param item
+     */
     @Override
     public void addFirst(T item) {
 
         if(nextFirst == nextLast) {
             /* at least size + 2 once a time */
-            resize(size * 2);
+            resize(size * ZOOM_FACTOR);
         }
         int n = items.length;
         items[nextFirst] = item;
@@ -36,7 +55,7 @@ public class ArrayDeque<T> implements Deque<T> {
     }
 
     /**
-     * resize method for add operation
+     * Resize the deque to i's length.
      * @param i
      */
     private void resize(int i) {
@@ -51,11 +70,15 @@ public class ArrayDeque<T> implements Deque<T> {
 
     }
 
+    /**
+     * Adds an item to the back of the deque.
+     * @param item
+     */
     @Override
     public void addLast(T item) {
 
         if(nextFirst == nextLast) {
-            resize(size * 2);
+            resize(size * ZOOM_FACTOR);
         }
         int n = items.length;
         items[nextLast] = item;
@@ -65,11 +88,18 @@ public class ArrayDeque<T> implements Deque<T> {
     }
 
 
+    /**
+     * Get the size of the deque.
+     * @return
+     */
     @Override
     public int size() {
         return size;
     }
 
+    /**
+     * Print out the deque with space between each item.
+     */
     @Override
     public void printDeque() {
         int i = nextFirst + 1;
@@ -80,11 +110,15 @@ public class ArrayDeque<T> implements Deque<T> {
         System.out.println(" ");
     }
 
+    /**
+     * Remove the first item of the deque.
+     * @return
+     */
     @Override
     public T removeFirst() {
         if ((size < items.length / 4) && (size > 4)) {
             /** Replace the size with the items.length since size / 4 may cause the IndexOutOfBounds Exception*/
-            resize(items.length / 4);
+            resize(items.length / ZOOM_FACTOR);
         }
         if(size == 0)
             return null;
@@ -95,11 +129,15 @@ public class ArrayDeque<T> implements Deque<T> {
         return x;
     }
 
+    /**
+     * Remove the last item of the deque.
+     * @return
+     */
     @Override
     public T removeLast() {
         if ((size < items.length / 4) && (size > 4)) {
             /** Replace the size with the items.length since size / 4 may cause the IndexOutOfBounds Exception*/
-            resize(items.length / 4);
+            resize(items.length / ZOOM_FACTOR);
         }
         if(size == 0)
             return null;
@@ -110,6 +148,11 @@ public class ArrayDeque<T> implements Deque<T> {
         return x;
     }
 
+    /**
+     * Get the item of the deque at the exact position "index".
+     * @param index
+     * @return
+     */
     @Override
     public T get(int index) {
         if(index >= items.length || index < 0)
@@ -117,6 +160,9 @@ public class ArrayDeque<T> implements Deque<T> {
         return items[index];
     }
 
+    /**
+     * Nested class for generating iterator
+     */
     private class ArrayDequeIterator implements Iterator<T> {
 
         private int index;
@@ -138,8 +184,7 @@ public class ArrayDeque<T> implements Deque<T> {
         }
     }
     /**
-     * iterator for ArrayDeque
-     * @return
+     * Iterator for the deque
      */
     public Iterator<T> iterator() {
         return new ArrayDequeIterator();
@@ -147,9 +192,11 @@ public class ArrayDeque<T> implements Deque<T> {
 
 
     /**
-     * if object o equals this Deque totally, return true.
+     * Returns whether Object o equals the deque.
+     * "o" is considered equal if it is a deque and
+     * if it contains the same items as this deque in
+     * the same order.
      * @param o
-     * @return
      */
     public boolean equals(Object o) {
         if (!(o instanceof ArrayDeque)) {

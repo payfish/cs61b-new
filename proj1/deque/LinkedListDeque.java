@@ -30,6 +30,10 @@ public class LinkedListDeque <T> implements Deque <T>  {
         size = 0;
     }
 
+    /**
+     * Adds one item of type T to the front of the deque.
+     * @param item
+     */
     @Override
     public void addFirst(T item) {
         listnode l = new listnode(item);
@@ -42,6 +46,10 @@ public class LinkedListDeque <T> implements Deque <T>  {
         size += 1;
     }
 
+    /**
+     * Adds one item of type T to the back of the deque.
+     * @param item
+     */
     @Override
     public void addLast(T item) {
         listnode l = new listnode(item);
@@ -54,12 +62,18 @@ public class LinkedListDeque <T> implements Deque <T>  {
         size += 1;
     }
 
-
+    /**
+     * Get the size of the deque.
+     * @return size
+     */
     @Override
     public int size() {
         return size;
     }
 
+    /**
+     * Print out the deque with space between each item.
+     */
     @Override
     public void printDeque() {
         listnode print = sentinel.next;
@@ -72,6 +86,10 @@ public class LinkedListDeque <T> implements Deque <T>  {
         System.out.println("");
     }
 
+    /**
+     * Remove the first item of the deque.
+     * @return
+     */
     @Override
     public T removeFirst() {
         if(sentinel.next == sentinel) {
@@ -84,6 +102,10 @@ public class LinkedListDeque <T> implements Deque <T>  {
         return  first.item;
     }
 
+    /**
+     * Remove the last item of the deque.
+     * @return
+     */
     @Override
     public T removeLast() {
         if(sentinel.next == sentinel) {
@@ -96,6 +118,11 @@ public class LinkedListDeque <T> implements Deque <T>  {
         return last.item;
     }
 
+    /**
+     * Get the item of the deque at the exact position "index".
+     * @param index
+     * @return
+     */
     @Override
     public T get(int index) {
         if(index > size) {
@@ -109,7 +136,9 @@ public class LinkedListDeque <T> implements Deque <T>  {
         return idx.item;
     }
 
-
+    /**
+     * Nested class for generating iterator
+     */
     private class LinkedListIterator implements Iterator<T> {
 
         private listnode<T> nextNode = sentinel.next;
@@ -136,9 +165,11 @@ public class LinkedListDeque <T> implements Deque <T>  {
 
 
     /**
-     * if object o equals this Deque totally, return true.
+     * Returns whether Object o equals the deque.
+     * "o" is considered equal if it is a deque and
+     * if it contains the same items as this deque in
+     * the same order.
      * @param o
-     * @return
      */
     public boolean equals(Object o) {
         if (!(o instanceof LinkedListDeque)) {

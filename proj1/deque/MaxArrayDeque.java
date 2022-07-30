@@ -4,10 +4,8 @@ import java.util.Comparator;
 import java.util.Iterator;
 
 public class MaxArrayDeque<T> extends ArrayDeque<T> {
-    public MaxArrayDeque() {
-        super();
-    }
 
+    private final Comparator<T> _c;
 
     @Override
     public void addFirst(T item) {
@@ -55,15 +53,25 @@ public class MaxArrayDeque<T> extends ArrayDeque<T> {
     }
 
     public MaxArrayDeque(Comparator<T> c) {
-
+        _c = c;
     }
 
+
     public T max() {
-        return null;
+        return max(_c);
     }
 
     public T max(Comparator<T> c) {
-        return null;
+        if(this.size() == 0) {
+            return null;
+        }
+        T res = this.getFirst();
+        Iterator<T> iterator = this.iterator();
+        while(iterator.hasNext()) {
+            T tem = iterator.next();
+            res = c.compare(res, tem) > 0 ? res : tem;
+        }
+        return res;
     }
 
 }
