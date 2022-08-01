@@ -46,6 +46,10 @@ public class LinkedListDeque <T> implements Deque <T>  {
         size += 1;
     }
 
+    @Override
+    public T getFirst() {
+        return sentinel.next.item;
+    }
     /**
      * Adds one item of type T to the back of the deque.
      * @param item

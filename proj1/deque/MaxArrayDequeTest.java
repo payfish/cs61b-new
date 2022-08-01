@@ -11,8 +11,8 @@ public class MaxArrayDequeTest {
     private final Comparator<Integer> c = Comparator.comparingInt(o -> o);
 
     /**
-     * tests for method max without arguments
-     * and another test of generic type String
+     * tests for method max without arguments.
+     * tests if generic type works good.
      */
     @Test
     public void comparatorTest() {

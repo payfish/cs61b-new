@@ -29,6 +29,7 @@ public class ArrayDeque<T> implements Deque<T> {
      * get the first item of the deque.
      * @return item
      */
+    @Override
     public T getFirst() {
         if(size == 0) {
             return null;
