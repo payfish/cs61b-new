@@ -6,36 +6,36 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 public class RandomSizeTest {
-    private static final int []tests = {4, 5, 15, 30};
+    private static final int []TESTS = {4, 5, 15, 30};
     @Test
-    public void testThreeAddThreeRemove(){
-        LinkedListDeque<Integer> LLD = new LinkedListDeque<>();
-        ArrayDeque<Integer> AD = new ArrayDeque<>();
-        for(int i: tests){
-            LLD.addLast(i);
-            AD.addLast(i);
+    public void testThreeAddThreeRemove() {
+        LinkedListDeque<Integer> lld = new LinkedListDeque<>();
+        ArrayDeque<Integer> ad = new ArrayDeque<>();
+        for (int i: TESTS) {
+            lld.addLast(i);
+            ad.addLast(i);
         }
-        assertEquals(LLD.removeLast(), AD.removeLast());
-        assertEquals(LLD.removeLast(), AD.removeLast());
-        assertEquals(LLD.removeLast(), AD.removeLast());
+        assertEquals(lld.removeLast(), ad.removeLast());
+        assertEquals(lld.removeLast(), ad.removeLast());
+        assertEquals(lld.removeLast(), ad.removeLast());
     }
 
     @Test
-    public void randomizedTest(){
-        LinkedListDeque<Integer> LLD = new LinkedListDeque<>();
-        ArrayDeque<Integer> AD = new ArrayDeque<>();
+    public void randomizedTest() {
+        LinkedListDeque<Integer> lld = new LinkedListDeque<>();
+        ArrayDeque<Integer> ad = new ArrayDeque<>();
         int N = 5000000;
         for (int i = 0; i < N; i += 1) {
             int operationNumber = StdRandom.uniform(0, 3);
             if (operationNumber == 0) {
                 // addLast
                 int randVal = StdRandom.uniform(0, 100);
-                LLD.addLast(randVal);
-                AD.addLast(randVal);
-            } else if (operationNumber == 1 && AD.size() > 0 ){
-                assertEquals(LLD.removeLast(), AD.removeLast());
+                lld.addLast(randVal);
+                ad.addLast(randVal);
+            } else if (operationNumber == 1 && ad.size() > 0) {
+                assertEquals(lld.removeLast(), ad.removeLast());
             } else {
-                assertEquals(LLD.size(), AD.size());
+                assertEquals(lld.size(), ad.size());
             }
         }
     }

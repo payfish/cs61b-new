@@ -1,12 +1,10 @@
 package deque;
 
-public interface Deque <T>{
+public interface Deque<T> {
 
     /** Adds an item of type T to the front of the deque.
      * You can assume that item is never null. */
     void addFirst(T item);
-
-    T getFirst();
 
     /** Adds an item of type T to the back of the deque.
      * You can assume that item is never null. */

@@ -16,18 +16,18 @@ public class GuitarHero {
             guitarStrings[i] = new GuitarString(frequency);
         }
 
-        while(true) {
+        while (true) {
             if (StdDraw.hasNextKeyTyped()) {
                 char key = StdDraw.nextKeyTyped();
-                for(int i = 0; i < NUMS; i += 1) {
-                    if(keyboard.charAt(i) == key){
+                for (int i = 0; i < NUMS; i += 1) {
+                    if (keyboard.charAt(i) == key) {
                         guitarStrings[i].pluck();
                     }
                 }
             }
 
             double sample = 0.0;
-            for(GuitarString gs : guitarStrings){
+            for (GuitarString gs : guitarStrings) {
                 sample += gs.sample();
                 gs.tic();
             }

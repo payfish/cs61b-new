@@ -5,7 +5,7 @@ import java.util.Iterator;
 public class ArrayDeque<T> implements Deque<T> {
 
     /**
-     * Good idea to set these parameters to final,learnt from goat @xiaotian
+     * Good idea to set these parameters to final,learnt from @xiaotianxt
      */
     private final int INITIAL_SIZE = 8;
     private final int ZOOM_FACTOR = 2;
@@ -29,9 +29,8 @@ public class ArrayDeque<T> implements Deque<T> {
      * get the first item of the deque.
      * @return item
      */
-    @Override
     public T getFirst() {
-        if(size == 0) {
+        if (size == 0) {
             return null;
         }
         return items[(nextFirst + 1) % items.length];
@@ -44,7 +43,7 @@ public class ArrayDeque<T> implements Deque<T> {
     @Override
     public void addFirst(T item) {
 
-        if(nextFirst == nextLast) {
+        if (nextFirst == nextLast) {
             /* at least size + 2 once a time */
             resize(size * ZOOM_FACTOR);
         }
@@ -78,7 +77,7 @@ public class ArrayDeque<T> implements Deque<T> {
     @Override
     public void addLast(T item) {
 
-        if(nextFirst == nextLast) {
+        if (nextFirst == nextLast) {
             resize(size * ZOOM_FACTOR);
         }
         int n = items.length;
@@ -104,7 +103,7 @@ public class ArrayDeque<T> implements Deque<T> {
     @Override
     public void printDeque() {
         int i = nextFirst + 1;
-        while(i != nextLast) {
+        while (i != nextLast) {
             System.out.print(items[i] + " ");
             i = (i + 1) % items.length;
         }
@@ -118,13 +117,15 @@ public class ArrayDeque<T> implements Deque<T> {
     @Override
     public T removeFirst() {
         if ((size < items.length / 4) && (size > 4)) {
-            /** Replace the size with the items.length since size / 4 may cause the IndexOutOfBounds Exception*/
+            /** Replace the size with the items.length since
+             * size / 4 may cause the IndexOutOfBounds Exception*/
             resize(items.length / ZOOM_FACTOR);
         }
-        if(size == 0)
+        if (size == 0) {
             return null;
+        }
         int i = (++nextFirst) % items.length;
-        T x = get(i);
+        T x = items[i];
         items[i] = null;
         size = size - 1;
         return x;
@@ -137,13 +138,15 @@ public class ArrayDeque<T> implements Deque<T> {
     @Override
     public T removeLast() {
         if ((size < items.length / 4) && (size > 4)) {
-            /** Replace the size with the items.length since size / 4 may cause the IndexOutOfBounds Exception*/
+            /** Replace the size with the items.length since
+             * size / 4 may cause the IndexOutOfBounds Exception*/
             resize(items.length / ZOOM_FACTOR);
         }
-        if(size == 0)
+        if (size == 0) {
             return null;
+        }
         int i = (--nextLast + items.length) % items.length;
-        T x = get(i);
+        T x = items[i];
         items[i] = null;
         size = size - 1;
         return x;
@@ -156,9 +159,10 @@ public class ArrayDeque<T> implements Deque<T> {
      */
     @Override
     public T get(int index) {
-        if(index >= items.length || index < 0)
+        if (index >= size) {
             return null;
-        return items[index];
+        }
+        return items[(index + nextFirst + 1) % items.length];
     }
 
     /**
@@ -209,7 +213,7 @@ public class ArrayDeque<T> implements Deque<T> {
 
         ArrayDeque<T> other = (ArrayDeque<T>) o;
 
-        if(this.getClass() != other.getClass()) {
+        if (this.getClass() != other.getClass()) {
             return false;
         }
         if (this.size != other.size()) {
@@ -219,7 +223,7 @@ public class ArrayDeque<T> implements Deque<T> {
         Iterator<T> iterator = this.iterator();
         Iterator<T> iterator1 = other.iterator();
         while (iterator.hasNext()) {
-            if(iterator.next() != iterator1.next()) {
+            if (iterator.next() != iterator1.next()) {
                 return false;
             }
         }

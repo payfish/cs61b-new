@@ -62,12 +62,12 @@ public class MaxArrayDeque<T> extends ArrayDeque<T> {
     }
 
     public T max(Comparator<T> c) {
-        if(this.size() == 0) {
+        if (this.size() == 0) {
             return null;
         }
         T res = this.getFirst();
         Iterator<T> iterator = this.iterator();
-        while(iterator.hasNext()) {
+        while (iterator.hasNext()) {
             T tem = iterator.next();
             res = c.compare(res, tem) > 0 ? res : tem;
         }
