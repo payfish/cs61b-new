@@ -26,17 +26,6 @@ public class ArrayDeque<T> implements Deque<T> {
     }
 
     /**
-     * get the first item of the deque.
-     * @return item
-     */
-    public T getFirst() {
-        if (size == 0) {
-            return null;
-        }
-        return items[(nextFirst + 1) % items.length];
-    }
-
-    /**
      * Adds one item of type T to the front of the deque.
      * @param item
      */

@@ -21,7 +21,7 @@ public class MaxArrayDequeTest {
         mad.addFirst(100);
         mad.addFirst(2);
         mad.addFirst(3);
-        assertEquals(100,(int)mad.max());
+        assertEquals(100, (int)mad.max());
 
 
 
@@ -35,7 +35,7 @@ public class MaxArrayDequeTest {
 
         System.out.println("Printing out deque mad1: ");
         mad1.printDeque();
-        assertEquals("middle",mad1.max(c1));
+        assertEquals("middle", mad1.max(c1));
 
     }
 
