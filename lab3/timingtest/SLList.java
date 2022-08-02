@@ -45,17 +45,9 @@ public class SLList<Item> {
 
 	/** Adds x to the end of the list. */
 	public void addLast(Item x) {
+		last.next = new IntNode(x, null);
 		size = size + 1;
-
-		IntNode p = sentinel;
-
-		/* Advance p to the end of the list. */
-		while (p.next != null) {
-			p = p.next;
-		}
-
-		p.next = new IntNode(x, null);
-		last = p.next;
+		last = last.next;
 	}
 
 	/** returns last item in the list */
