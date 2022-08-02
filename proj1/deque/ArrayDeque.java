@@ -1,5 +1,7 @@
 package deque;
 
+import java.lang.module.FindException;
+import java.util.Arrays;
 import java.util.Iterator;
 
 public class ArrayDeque<T> implements Deque<T> {
@@ -32,29 +34,36 @@ public class ArrayDeque<T> implements Deque<T> {
     @Override
     public void addFirst(T item) {
 
-        if (nextFirst == nextLast) {
+        int n = items.length;
+        items[nextFirst] = item;
+        nextFirst = (nextFirst + n - 1) % n;
+        size += 1;
+        if (size == items.length) {
             /* at least size + 2 once a time */
             resize(size * ZOOM_FACTOR);
         }
-        int n = items.length;
-        items[nextFirst % items.length] = item;
-        nextFirst = (nextFirst + n - 1) % n;
-        size += 1;
 
     }
 
     /**
-     * Resize the deque to i's length.
-     * @param i
+     * Resize the deque to capacity's length.
+     * @param capacity
      */
-    private void resize(int i) {
+    private void resize(int capacity) {
 
-        T[] a = (T[]) new Object[i];
-        int t = (nextFirst + 1) % items.length;
+        T[] a = (T[]) new Object[capacity];
+        int n = items.length;
+        int f1 = (nextFirst + 1) % n;
+        int l1 = (nextLast - 1 + n) % n;
+        if (f1 < l1) {
+            System.arraycopy(items,f1, a, 0, size());
+        }else {
+            System.arraycopy(items, f1, a, 0, n - f1);
+            System.arraycopy(items, 0, a, n - l1, l1 + 1);
+        }
 
-        System.arraycopy(items, 0, a, 0, nextLast);
-        System.arraycopy(items, t, a, i - (size - nextLast), size - nextLast);
-        nextFirst = i - size + nextLast - 1;
+        nextFirst = capacity - 1;
+        nextLast = size;
         items = a;
 
     }
@@ -66,14 +75,13 @@ public class ArrayDeque<T> implements Deque<T> {
     @Override
     public void addLast(T item) {
 
-        if (nextFirst == nextLast) {
-            resize(size * ZOOM_FACTOR);
-        }
         int n = items.length;
-        items[nextLast % items.length] = item;
+        items[nextLast] = item;
         nextLast = (nextLast + 1) % n;
         size += 1;
-
+        if (size == items.length) {
+            resize(size * ZOOM_FACTOR);
+        }
     }
 
 
@@ -105,18 +113,20 @@ public class ArrayDeque<T> implements Deque<T> {
      */
     @Override
     public T removeFirst() {
+
+        if (size == 0) {
+            return null;
+        }
+        nextFirst = (nextFirst + 1) % items.length;
+        T x = items[nextFirst];
+        items[nextFirst] = null;
+
+        size = size - 1;
         if ((size < items.length / 4) && (size > 4)) {
             /** Replace the size with the items.length since
              * size / 4 may cause the IndexOutOfBounds Exception*/
             resize(items.length / ZOOM_FACTOR);
         }
-        if (size == 0) {
-            return null;
-        }
-        int i = (++nextFirst) % items.length;
-        T x = items[i];
-        items[i] = null;
-        size = size - 1;
         return x;
     }
 
@@ -126,18 +136,19 @@ public class ArrayDeque<T> implements Deque<T> {
      */
     @Override
     public T removeLast() {
+
+        if (size == 0) {
+            return null;
+        }
+        nextLast = (nextLast + items.length - 1) % items.length;
+        T x = items[nextLast];
+        items[nextLast] = null;
+        size = size - 1;
         if ((size < items.length / 4) && (size > 4)) {
             /** Replace the size with the items.length since
              * size / 4 may cause the IndexOutOfBounds Exception*/
             resize(items.length / ZOOM_FACTOR);
         }
-        if (size == 0) {
-            return null;
-        }
-        int i = (--nextLast + items.length) % items.length;
-        T x = items[i];
-        items[i] = null;
-        size = size - 1;
         return x;
     }
 
@@ -233,10 +244,5 @@ public class ArrayDeque<T> implements Deque<T> {
         return true;
 
     }
-
-    /**
-     * helper method for equals
-     */
-
-
+    
 }
