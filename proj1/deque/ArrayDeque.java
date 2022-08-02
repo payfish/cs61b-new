@@ -37,7 +37,7 @@ public class ArrayDeque<T> implements Deque<T> {
             resize(size * ZOOM_FACTOR);
         }
         int n = items.length;
-        items[nextFirst] = item;
+        items[nextFirst % items.length] = item;
         nextFirst = (nextFirst + n - 1) % n;
         size += 1;
 
@@ -70,7 +70,7 @@ public class ArrayDeque<T> implements Deque<T> {
             resize(size * ZOOM_FACTOR);
         }
         int n = items.length;
-        items[nextLast] = item;
+        items[nextLast % items.length] = item;
         nextLast = (nextLast + 1) % n;
         size += 1;
 
@@ -161,7 +161,7 @@ public class ArrayDeque<T> implements Deque<T> {
 
         private int index;
 
-        public ArrayDequeIterator() {
+        ArrayDequeIterator() {
             index = (nextFirst + 1) % items.length;
         }
 
@@ -193,19 +193,33 @@ public class ArrayDeque<T> implements Deque<T> {
      * @param o
      */
     public boolean equals(Object o) {
-        if (!(o instanceof ArrayDeque)) {
+        if (o == null) {
             return false;
         }
-        if (this == o || this == null && o == null) {
+        if (!(o instanceof Deque)) {
+            return false;
+        }
+        if (this == o) {
+            return true;
+        }
+        if (this.size != ((Deque) o).size()) {
+            return false;
+        }
+        if (!(o instanceof ArrayDeque)) {
+            Deque<T> other = (Deque<T>) o;
+            for (int i = 0; i < this.size(); i += 1) {
+                T t1 = other.get(i);
+                T t2 = this.get(i);
+                if (!t1.equals(t2)) {
+                    return false;
+                }
+            }
             return true;
         }
 
-        ArrayDeque<T> other = (ArrayDeque<T>) o;
+        ArrayDeque other = (ArrayDeque) o;
 
         if (this.getClass() != other.getClass()) {
-            return false;
-        }
-        if (this.size != other.size()) {
             return false;
         }
 
@@ -217,6 +231,12 @@ public class ArrayDeque<T> implements Deque<T> {
             }
         }
         return true;
+
     }
+
+    /**
+     * helper method for equals
+     */
+
 
 }

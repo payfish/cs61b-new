@@ -172,22 +172,31 @@ public class LinkedListDeque<T> implements Deque<T> {
      * @param o
      */
     public boolean equals(Object o) {
-        if (!(o instanceof LinkedListDeque)) {
+        if (o == null) {
             return false;
         }
-        if (this == o || this == null && o == null) {
+        if (!(o instanceof Deque)) {
+            return false;
+        }
+        if (this == o) {
+            return true;
+        }
+        if (this.size != ((Deque) o).size()) {
+            return false;
+        }
+        if (!(o instanceof LinkedListDeque)) {
+            Deque<T> other = (Deque<T>) o;
+            for (int i = 0; i < this.size(); i += 1) {
+                T t1 = other.get(i);
+                T t2 = this.get(i);
+                if (!t1.equals(t2)) {
+                    return false;
+                }
+            }
             return true;
         }
 
         LinkedListDeque<T> other = (LinkedListDeque<T>) o;
-
-        if (this.getClass() != other.getClass()) {
-            return false;
-        }
-        if (this.size != other.size()) {
-            return false;
-        }
-
         Iterator<T> iterator = this.iterator();
         Iterator<T> iterator1 = other.iterator();
         while (iterator.hasNext()) {
@@ -216,7 +225,7 @@ public class LinkedListDeque<T> implements Deque<T> {
      * @param ln
      * @return
      */
-    public T recursive(int index, Node<T> ln) {
+    private T recursive(int index, Node<T> ln) {
         if (index == 0) {
             return ln.item;
         }

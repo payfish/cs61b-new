@@ -11,7 +11,7 @@ public class GuitarHero {
         String keyboard =  "q2we4r5ty7u8i9op-[=zxdcfvgbnjmk,.;/' ";
         GuitarString []guitarStrings = new GuitarString[NUMS];
 
-        for(int i = 0; i < NUMS; i += 1) {
+        for (int i = 0; i < NUMS; i += 1) {
             Double frequency = 440 * Math.pow(2, (i - 24) / 12.0);
             guitarStrings[i] = new GuitarString(frequency);
         }
