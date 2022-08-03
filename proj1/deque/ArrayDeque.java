@@ -1,15 +1,9 @@
 package deque;
 
-import java.lang.module.FindException;
-import java.util.Arrays;
 import java.util.Iterator;
 
-public class ArrayDeque<T> implements Deque<T> {
+public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
-    /**
-     * Good idea to set these parameters to final,learnt from @xiaotianxt
-     */
-    private final int INITIAL_SIZE = 8;
     private final int ZOOM_FACTOR = 2;
 
     private T[] items;
@@ -20,6 +14,7 @@ public class ArrayDeque<T> implements Deque<T> {
 
     public ArrayDeque() {
 
+        int INITIAL_SIZE = 8;
         items = (T[]) new Object[INITIAL_SIZE];
         size = 0;
         nextFirst = INITIAL_SIZE - 1;
@@ -55,11 +50,11 @@ public class ArrayDeque<T> implements Deque<T> {
         int n = items.length;
         int f1 = (nextFirst + 1) % n;
         int l1 = (nextLast - 1 + n) % n;
-        if (f1 < l1) {
-            System.arraycopy(items,f1, a, 0, size());
-        }else {
+        if (f1 >= l1) {
             System.arraycopy(items, f1, a, 0, n - f1);
-            System.arraycopy(items, 0, a, n - l1, l1 + 1);
+            System.arraycopy(items, 0, a, n - f1, l1 + 1);
+        } else { //
+            System.arraycopy(items, f1, a, 0, size());
         }
 
         nextFirst = capacity - 1;
@@ -122,8 +117,12 @@ public class ArrayDeque<T> implements Deque<T> {
         items[nextFirst] = null;
 
         size = size - 1;
+        if (size == 0) {
+            nextLast = 0;
+            nextFirst = items.length - 1;
+        }
         if ((size < items.length / 4) && (size > 4)) {
-            /** Replace the size with the items.length since
+            /** Replace the size with the (items.length) since
              * size / 4 may cause the IndexOutOfBounds Exception*/
             resize(items.length / ZOOM_FACTOR);
         }
@@ -144,8 +143,12 @@ public class ArrayDeque<T> implements Deque<T> {
         T x = items[nextLast];
         items[nextLast] = null;
         size = size - 1;
+        if (size == 0) {
+            nextLast = 0;
+            nextFirst = items.length - 1;
+        }
         if ((size < items.length / 4) && (size > 4)) {
-            /** Replace the size with the items.length since
+            /** Replace the size with the (items.length) since
              * size / 4 may cause the IndexOutOfBounds Exception*/
             resize(items.length / ZOOM_FACTOR);
         }
@@ -216,12 +219,19 @@ public class ArrayDeque<T> implements Deque<T> {
         if (this.size != ((Deque) o).size()) {
             return false;
         }
+
         if (!(o instanceof ArrayDeque)) {
             Deque<T> other = (Deque<T>) o;
             for (int i = 0; i < this.size(); i += 1) {
                 T t1 = other.get(i);
                 T t2 = this.get(i);
-                if (!t1.equals(t2)) {
+                if (t2 == null) {
+                    if (t1 != null) {
+                        return false;
+                    }
+                    continue;
+                }
+                if (!t2.equals(t1)) {
                     return false;
                 }
             }
@@ -229,10 +239,6 @@ public class ArrayDeque<T> implements Deque<T> {
         }
 
         ArrayDeque other = (ArrayDeque) o;
-
-        if (this.getClass() != other.getClass()) {
-            return false;
-        }
 
         Iterator<T> iterator = this.iterator();
         Iterator<T> iterator1 = other.iterator();
@@ -244,5 +250,5 @@ public class ArrayDeque<T> implements Deque<T> {
         return true;
 
     }
-    
+
 }

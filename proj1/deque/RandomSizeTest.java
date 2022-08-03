@@ -24,7 +24,7 @@ public class RandomSizeTest {
     public void randomizedTest() {
         LinkedListDeque<Integer> lld = new LinkedListDeque<>();
         ArrayDeque<Integer> ad = new ArrayDeque<>();
-        int N = 5000000;
+        int N = 100000;
         for (int i = 0; i < N; i += 1) {
             int operationNumber = StdRandom.uniform(0, 3);
             if (operationNumber == 0) {
@@ -33,9 +33,13 @@ public class RandomSizeTest {
                 lld.addLast(randVal);
                 ad.addLast(randVal);
             } else if (operationNumber == 1 && ad.size() > 0) {
+                assertEquals(lld.removeFirst(), ad.removeFirst());
+            } else if (operationNumber == 2 && ad.size() > 0) {
                 assertEquals(lld.removeLast(), ad.removeLast());
             } else {
-                assertEquals(lld.size(), ad.size());
+                int randVal = StdRandom.uniform(0, 100);
+                lld.addFirst(randVal);
+                ad.addFirst(randVal);
             }
         }
     }

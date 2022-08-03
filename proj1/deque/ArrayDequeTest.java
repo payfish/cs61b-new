@@ -146,24 +146,17 @@ public class ArrayDequeTest {
 
     }
     @Test
-    public void equalsTest() {
+    public void resizeTest() {
+        Deque<Integer> ad = new ArrayDeque<>();
+        for (int i = 0; i < 8; i += 1) {
+            ad.addFirst(i);
+        }
+        for (int j = 0; j < 8; j += 1) {
+            assertNotNull(ad.removeFirst());
 
-        ArrayDeque<Integer> arrd1 = new ArrayDeque<>();
-        ArrayDeque<Integer> arrd2 = new ArrayDeque<>();
-        ArrayDeque<String> arrd3 = new ArrayDeque<>();
-
-        arrd1.addFirst(3);
-        arrd1.addFirst(4);
-
-        arrd2.addFirst(3);
-        arrd2.addFirst(4);
-        arrd2.addFirst(7);
-
-        arrd3.addFirst("3");
-        arrd3.addFirst("4");
-
-        assertFalse(arrd1.equals(arrd2));
-        assertFalse(arrd1.equals(arrd3));
+        }
 
     }
+
+
 }
