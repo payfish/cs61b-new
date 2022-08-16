@@ -14,9 +14,7 @@ import static capers.Utils.*;
  *    - story -- file containing the current story
  */
 public class CapersRepository {
-    public static void main(String[] args) {
-        writeStory("111");
-    }
+    
     /** Current Working Directory. */
     static final File CWD = new File(System.getProperty("user.dir"));
 
@@ -25,6 +23,8 @@ public class CapersRepository {
 
     /** Story file. */
     static final File story = join(CAPERS_FOLDER, "story");
+
+
 
 
     /**
@@ -40,7 +40,13 @@ public class CapersRepository {
 
         CAPERS_FOLDER.mkdir();
         Dog.DOG_FOLDER.mkdir();
-
+        if (!story.exists()) {
+            try {
+                story.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
