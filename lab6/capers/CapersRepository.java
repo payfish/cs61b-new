@@ -14,7 +14,7 @@ import static capers.Utils.*;
  *    - story -- file containing the current story
  */
 public class CapersRepository {
-    
+
     /** Current Working Directory. */
     static final File CWD = new File(System.getProperty("user.dir"));
 
@@ -77,7 +77,7 @@ public class CapersRepository {
     public static void makeDog(String name, String breed, int age) {
         Dog dog = new Dog(name, breed, age);
         dog.saveDog();
-        System.out.println(dog.toString());
+        System.out.println(dog);
     }
 
     /**
