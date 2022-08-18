@@ -25,7 +25,7 @@ public class TestBSTMap {
         for (int i = 0; i < 455; i++) {
             b.put("hi" + i, 1+i);
             //make sure put is working via containsKey and get
-            assertTrue( null != b.get("hi" + i) && (b.get("hi"+i).equals(1+i))
+            assertTrue( null != b.get("hi" + i) && (b.get("hi" + i).equals(1+i))
                         && b.containsKey("hi" + i));
         }
         assertEquals(455, b.size());
@@ -85,6 +85,15 @@ public class TestBSTMap {
         BSTMap<String, Integer> b = new BSTMap<String, Integer>();
         b.put("hi", null);
         assertTrue(b.containsKey("hi"));
+    }
+
+    @Test
+    public void printInOrderTest() {
+        BSTMap<Integer, Integer> b = new BSTMap<Integer, Integer>();
+        b.put(2, 2);
+        b.put(1, 1);
+        b.put(3, 3);
+        b.printInOrder();
     }
 
 }
