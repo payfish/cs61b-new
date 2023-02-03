@@ -30,17 +30,45 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
 
     @Override
     public V remove(K key) {
-        throw new UnsupportedOperationException();
+        int index = getIndex(key);
+        if (buckets[index] == null) {
+            return null;
+        } else {
+            Collection collection = buckets[index];
+            Iterator<Node> iterator = collection.iterator();
+            while (iterator.hasNext()) {
+                Node node = iterator.next();
+                if (node.getKey().equals(key)) {
+                    collection.remove(node);
+                    return node.getValue();
+                }
+            }
+        }
+        return null;
     }
 
     @Override
     public V remove(K key, V value) {
-        throw new UnsupportedOperationException();
+        int index = getIndex(key);
+        if (buckets[index] == null) {
+            return null;
+        } else {
+            Collection collection = buckets[index];
+            Iterator<Node> iterator = collection.iterator();
+            while (iterator.hasNext()) {
+                Node node = iterator.next();
+                if (node.getKey().equals(key) && node.getValue().equals(value)) {
+                    collection.remove(node);
+                    return value;
+                }
+            }
+        }
+        return null;
     }
 
     @Override
     public Iterator<K> iterator() {
-        return null;
+        return new MHMiterator();
     }
     @Override
     public void clear() {
@@ -84,6 +112,22 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
         }
     }
 
+    private class MHMiterator implements Iterator<K> {
+
+        Set<K> keyset = keySet();
+        Iterator<K> iterator = keyset.iterator();
+
+        @Override
+        public boolean hasNext() {
+            return iterator.hasNext();
+        }
+
+
+        @Override
+        public K next() {
+            return iterator.next();
+        }
+    }
     /**
      * Helper method for get().
      * @param key
@@ -190,15 +234,15 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
             value = v;
         }
 
-        public K getKey() {
+        private K getKey() {
             return key;
         }
 
-        public V getValue() {
+        private V getValue() {
             return value;
         }
 
-        public void setValue(V value) {
+        private void setValue(V value) {
             this.value = value;
         }
     }

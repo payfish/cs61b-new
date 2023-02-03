@@ -1,6 +1,8 @@
 package hashmap;
 
 import static org.junit.Assert.*;
+
+import jh61b.junit.In;
 import org.junit.Test;
 
 import java.util.HashSet;
@@ -93,6 +95,9 @@ public class TestMyHashMap {
     public static void sanityPutTest(MyHashMap<String, Integer> b) {
         b.put("hi", 1);
         assertTrue(b.containsKey("hi") && b.get("hi") != null);
+        Integer i = b.remove("hi", 1);
+        assertFalse(b.containsKey("hi") && b.get("hi") != null);
+        System.out.println(i);
     }
 
     @Test
