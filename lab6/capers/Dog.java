@@ -62,9 +62,15 @@ public class Dog implements Serializable {
 
     @Override
     public String toString() {
-        return String.format(
-            "Woof! My name is %s and I am a %s! I am %d years old! Woof!",
-            name, breed, age);
+        if (age == 1) {
+            return String.format(
+                    "Woof! My name is %s and I am a %s! I am %d year old! Woof!",
+                    name, breed, 1);
+        } else {
+            return String.format(
+                    "Woof! My name is %s and I am a %s! I am %d years old! Woof!",
+                    name, breed, age);
+        }
     }
 
 }

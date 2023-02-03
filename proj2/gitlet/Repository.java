@@ -25,5 +25,35 @@ public class Repository {
     /** The .gitlet directory. */
     public static final File GITLET_DIR = join(CWD, ".gitlet");
 
-    /* TODO: fill in the rest of this class. */
+    /**
+     * Initialize the repository
+     */
+    public static void init() {
+        if (GITLET_DIR.exists()) {
+            System.out.println("A Gitlet version-control system already exists in the current directory.");
+        } else {
+            GITLET_DIR.mkdir();
+            initcommit();
+        }
+    }
+
+    private static void initcommit() {
+        Commit commit = new Commit();
+        commit.setTimeStamp("00:00:00 UTC, Thursday, 1 January 1970");
+        commit.setMessage("initial commit");
+        commit.setId(Utils.sha1(commit));
+    }
+
+    /**
+     * Validate the operands' numbers
+     * @param cmd
+     * @param args
+     * @param n
+     */
+    public void validateNumArgs(String cmd, String[] args, int n) {
+        if (args.length != n) {
+            throw new RuntimeException(
+                    String.format("Incorrect operands.", cmd));
+        }
+    }
 }

@@ -18,9 +18,42 @@ public class Commit {
      * comment above them describing what that variable represents and how that
      * variable is used. We've provided one example for `message`.
      */
-
+    /** When the commit took place. */
+    private String timeStamp;
     /** The message of this Commit. */
     private String message;
+    /** Parent commit of this commit*/
+    private String id;
 
-    /* TODO: fill in the rest of this class. */
+    public Commit() {}
+
+    public Commit(String timeStamp, String message, String id) {
+        this.timeStamp = timeStamp;
+        this.message = message;
+        this.id = id;
+    }
+
+    public String getTimeStamp() {
+        return timeStamp;
+    }
+
+    public void setTimeStamp(String timeStamp) {
+        this.timeStamp = timeStamp;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 }
