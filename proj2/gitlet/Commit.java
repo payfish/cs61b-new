@@ -1,43 +1,59 @@
 package gitlet;
 
-// TODO: any imports you need here
 
-import java.util.Date; // TODO: You'll likely use this in this class
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /** Represents a gitlet commit object.
  *  TODO: It's a good idea to give a description here of what else this Class
  *  does at a high level.
  *
- *  @author TODO
+ *  @author payfish
  */
-public class Commit {
+public class Commit implements Serializable {
     /**
-     * TODO: add instance variables here.
-     *
      * List all instance variables of the Commit class here with a useful
      * comment above them describing what that variable represents and how that
      * variable is used. We've provided one example for `message`.
      */
     /** When the commit took place. */
-    private String timeStamp;
+    private Date timeStamp;
     /** The message of this Commit. */
     private String message;
-    /** Parent commit of this commit*/
-    private String id;
+    /** Parent commit of this commit. */
+
+    private String author;
+
+    private String treeId;
+
+    private String parentId;
+
+    public Commit(Date timeStamp, String message, String author, String treeId, String parentId) {
+        this.timeStamp = timeStamp;
+        this.message = message;
+        this.author = author;
+        this.treeId = treeId;
+        this.parentId = parentId;
+    }
 
     public Commit() {}
 
-    public Commit(String timeStamp, String message, String id) {
-        this.timeStamp = timeStamp;
-        this.message = message;
-        this.id = id;
-    }
+//    /**
+//     * Add the new blob's hash id to the blobTree object
+//     * @param id
+//     */
+//    public void addBlobId(String id, Blob blob) {
+//        tree.put(id, blob);
+//    }
 
-    public String getTimeStamp() {
+
+    public Date getTimeStamp() {
         return timeStamp;
     }
 
-    public void setTimeStamp(String timeStamp) {
+    public void setTimeStamp(Date timeStamp) {
         this.timeStamp = timeStamp;
     }
 
@@ -49,11 +65,27 @@ public class Commit {
         this.message = message;
     }
 
-    public String getId() {
-        return id;
+    public String getAuthor() {
+        return author;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public String getTreeId() {
+        return treeId;
+    }
+
+    public void setTreeId(String treeId) {
+        this.treeId = treeId;
+    }
+
+    public String getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(String parentId) {
+        this.parentId = parentId;
     }
 }
