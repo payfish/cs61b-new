@@ -1,19 +1,16 @@
 package gitlet;
 
-import org.junit.Test;
+import java.util.Map;
+import java.util.TreeMap;
 
-import java.io.File;
-import java.util.Date;
+import static gitlet.Repository.GITLET_HEAD;
+import static gitlet.Repository.GITLET_OBJECTS_DIR;
 
-import static gitlet.Utils.join;
 
 public class FileTests {
-    @Test
     public static void main(String[] args) {
-        File CWD = new File(System.getProperty("user.dir"));
-        Commit commit = new Commit(new Date(0), "", "fred", null, "as213vv");
-        Repository repository = new Repository();
-        repository.output(CWD, commit);
-        System.out.println(CWD.toString());
+        String s = Utils.readContentsAsString(GITLET_HEAD);
+        System.out.println(s);
+        System.out.println(s.substring(s.lastIndexOf("\\")+1));
     }
 }

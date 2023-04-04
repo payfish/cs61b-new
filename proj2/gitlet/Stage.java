@@ -1,24 +1,34 @@
 package gitlet;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
-public class Stage {
-    private List<Blob> list;
+public class Stage implements Serializable {
+    private final Map<String, String> map = new HashMap<>();
 
-    public Stage() {
-        list = new ArrayList<>();
+    public void put(String filename, String id) {
+        map.put(filename, id);
     }
 
-    public void add2stage(Blob blob) {
-        list.add(blob);
+    public void remove(String filename) {
+        map.remove(filename);
     }
 
-    public void add2stage(List<Blob> blobs) {
-        list.addAll(blobs);
+    public boolean containsKey(String filename) {
+        return map.containsKey(filename);
     }
 
-    public List<Blob> getStagedBlobs() {
-        return list;
+    public String get(String filename) {
+        return map.get(filename);
+    }
+
+    public boolean isEmpty() {
+        return map.isEmpty();
+    }
+
+    public Iterator<String> iterator() {
+        return map.keySet().iterator();
     }
 }

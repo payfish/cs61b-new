@@ -1,6 +1,9 @@
 package gitlet;
 
 import java.io.IOException;
+import java.util.*;
+
+import static gitlet.Utils.*;
 
 /** Driver class for Gitlet, a subset of the Git version-control system.
  *  @author payfish
@@ -12,7 +15,7 @@ public class Main {
      */
     public static void main(String[] args) throws IOException {
         if (args.length == 0) {
-            System.out.println("Please enter a command.");
+            message("Please enter a command.");
             return;
         }
         String firstArg = args[0];
@@ -31,31 +34,54 @@ public class Main {
                 repository.commit(args[1]);
                 break;
             case "rm":
+                repository.validateNumArgs("rm", args, 2);
+                repository.rm(args[1]);
                 break;
             case "log":
-                System.out.println(1);
+                repository.validateNumArgs("log", args, 1);
+                repository.log();
                 break;
             case "global-log":
-                System.out.println();
+                repository.validateNumArgs("global-log", args, 1);
+                repository.global_log();
                 break;
             case "find":
+                repository.validateNumArgs("find", args, 2);
+                repository.find(args[1]);
                 break;
             case "status":
+                repository.validateNumArgs("status", args, 1);
+                repository.status();
                 break;
             case "checkout":
+                if (args.length == 2) {
+                    repository.checkout(args.length, args[1], null, null);
+                } else if (args.length == 3) {
+                    repository.checkout(args.length, null, null, args[2]);
+                } else {
+                    repository.checkout(args.length, null, args[1], args[3]);
+                }
                 break;
             case "branch":
+                repository.validateNumArgs("branch", args, 2);
+                repository.branch(args[1]);
                 break;
             case "rm-branch":
+                repository.validateNumArgs("rm-branch", args, 2);
+                repository.rm_branch(args[1]);
                 break;
             case "reset":
+                repository.validateNumArgs("reset", args, 2);
+                repository.reset(args[1]);
                 break;
             case "merge":
+                repository.validateNumArgs("merge", args, 2);
+                repository.merge(args[1]);
                 break;
             case "0":
                 System.exit(0);
             default:
-                System.out.println("No command with that name exists.");
+                message("No command with that name exists.");
                 break;
         }
         return;

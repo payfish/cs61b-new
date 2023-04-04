@@ -19,41 +19,32 @@ public class Commit implements Serializable {
      * variable is used. We've provided one example for `message`.
      */
     /** When the commit took place. */
-    private Date timeStamp;
+    private String timeStamp;
     /** The message of this Commit. */
     private String message;
     /** Parent commit of this commit. */
-
     private String author;
 
     private String treeId;
 
-    private String parentId;
+    private List<String> parentList;
 
-    public Commit(Date timeStamp, String message, String author, String treeId, String parentId) {
+    public Commit(String timeStamp, String message, String author, String treeId) {
         this.timeStamp = timeStamp;
         this.message = message;
         this.author = author;
         this.treeId = treeId;
-        this.parentId = parentId;
+        this.parentList = new ArrayList<>();
     }
 
     public Commit() {}
 
-//    /**
-//     * Add the new blob's hash id to the blobTree object
-//     * @param id
-//     */
-//    public void addBlobId(String id, Blob blob) {
-//        tree.put(id, blob);
-//    }
 
-
-    public Date getTimeStamp() {
+    public String getTimeStamp() {
         return timeStamp;
     }
 
-    public void setTimeStamp(Date timeStamp) {
+    public void setTimeStamp(String timeStamp) {
         this.timeStamp = timeStamp;
     }
 
@@ -81,11 +72,22 @@ public class Commit implements Serializable {
         this.treeId = treeId;
     }
 
-    public String getParentId() {
-        return parentId;
+    public List<String> getParentList() {
+        return parentList;
     }
 
-    public void setParentId(String parentId) {
-        this.parentId = parentId;
+    public void setParentID(String parentID) {
+        this.parentList.add(parentID);
+    }
+
+    @Override
+    public String toString() {
+        return "Commit{" +
+                "timeStamp=" + timeStamp +
+                ", message='" + message + '\'' +
+                ", author='" + author + '\'' +
+                ", treeId='" + treeId + '\'' +
+                ", parentId='" + parentList + '\'' +
+                '}';
     }
 }
