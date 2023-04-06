@@ -30,8 +30,11 @@ public class Main {
                 repository.add(args[1]);
                 break;
             case "commit":
-                repository.validateNumArgs("commit", args, 2);
-                repository.commit(args[1]);
+                if (args.length == 1) {
+                    repository.commit(null);
+                } else {
+                    repository.commit(args[1]);
+                }
                 break;
             case "rm":
                 repository.validateNumArgs("rm", args, 2);
@@ -54,12 +57,19 @@ public class Main {
                 repository.status();
                 break;
             case "checkout":
-                if (args.length == 2) {
-                    repository.checkout(args.length, args[1], null, null);
-                } else if (args.length == 3) {
-                    repository.checkout(args.length, null, null, args[2]);
+                int n = args.length;
+                if (n == 2) {
+                    repository.checkout(n, args[1], null, null);
                 } else {
-                    repository.checkout(args.length, null, args[1], args[3]);
+                    if (!args[n - 2].equals("--")) {
+                        message("Incorrect operands.");
+                        break;
+                    }
+                    if (n == 3) {
+                        repository.checkout(n, null, null, args[2]);
+                    } else if (n == 4) {
+                        repository.checkout(n, null, args[1], args[3]);
+                    }
                 }
                 break;
             case "branch":

@@ -9,8 +9,8 @@ import static gitlet.Repository.GITLET_OBJECTS_DIR;
 
 public class FileTests {
     public static void main(String[] args) {
-        String s = Utils.readContentsAsString(GITLET_HEAD);
+        String s = "a0da1ea5a15ab613bf9961fd86f010cf74c7ee48";
         System.out.println(s);
-        System.out.println(s.substring(s.lastIndexOf("\\")+1));
+        System.out.println(s.length());
     }
 }

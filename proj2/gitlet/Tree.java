@@ -3,6 +3,7 @@ package gitlet;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -37,5 +38,9 @@ public class Tree implements Serializable {
 
     public boolean isEmpty() {
         return tree.isEmpty();
+    }
+
+    public Set<String> keySet() {
+        return tree.keySet();
     }
 }

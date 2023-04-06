@@ -1,8 +1,5 @@
 package gitlet;
 
-import afu.org.checkerframework.checker.igj.qual.I;
-import org.checkerframework.checker.units.qual.C;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -21,6 +18,7 @@ public class Repository {
 
     /* The current working directory. */
     public static final File CWD = new File(System.getProperty("user.dir"));
+//    public static final File CWD = new File("F:\\YueLun\\Desktop\\test");
     /* The .gitlet directory. */
     public static final File GITLET_DIR = join(CWD, ".gitlet");
 
@@ -62,19 +60,27 @@ public class Repository {
     }
 
     public void add(String fileName) throws IOException {
+        if (!join(CWD, fileName).exists()) {
+            message("File does not exist.");
+            return;
+        }
         if (fileName.equals("*")) {
             addAll();
         } else {
             Blob blob = makeBlob(fileName);
             String blobId = output(GITLET_OBJECTS_DIR, blob);
-            /* If gitlet can find an id same as blobId in the current commit, do not stage it to the STAGE */
             Tree tree = getCommitTree(getHeadCommitId());
             Stage add_stage = readObject(GITLET_STAGE_ADDITION, Stage.class);
+            Stage rm_stage = readObject(GITLET_STAGE_REMOVAL, Stage.class);
             if (tree.containsKey(fileName) && tree.get(fileName).equals(blobId)) {
                 if (add_stage.containsKey(fileName) && add_stage.get(fileName).equals(blobId)) {
                     add_stage.remove(fileName);
                 }
-                message("No need to add the file.");
+                if (rm_stage.containsKey(fileName) && rm_stage.get(fileName).equals(blobId)) {
+                    rm_stage.remove(fileName);
+                }
+                rewriteObj(GITLET_STAGE_ADDITION, add_stage);
+                rewriteObj(GITLET_STAGE_REMOVAL, rm_stage);
                 return;
             }
             add_stage.put(fileName, blobId);
@@ -102,26 +108,11 @@ public class Repository {
             return;
         }
         Commit commit = new Commit(dateToTimeStamp(new Date()), message, "PayFish", null);
-        Tree tree = new Tree();
         /* Add HEAD commits' tree to the new tree */
         String headCommitId = getHeadCommitId();
-        Tree headTree = getCommitTree(headCommitId);
-        Iterator<String> T_iterator = headTree.iterator();
-        while (T_iterator.hasNext()) {
-            String nextKey = T_iterator.next();
-            tree.put(nextKey, headTree.get(nextKey));
-        }
+        Tree tree = getCommitTree(headCommitId);
         /* Add the blobs staged for addition or removal to new tree */
-        Iterator<String> iterator_add = add_stage.iterator();
-        Iterator<String> iterator_rm = rm_stage.iterator();
-        while (iterator_add.hasNext()) {
-            String nextKey = iterator_add.next();
-            tree.put(nextKey, add_stage.get(nextKey));
-        }
-        while (iterator_rm.hasNext()) {
-            String nextKey = iterator_rm.next();
-            tree.remove(nextKey);
-        }
+        staging(tree, add_stage, rm_stage);
         /* Save the tree and commit to the repo */
         String treeId = output(GITLET_OBJECTS_DIR, tree);
         commit.setTreeId(treeId);
@@ -133,31 +124,46 @@ public class Repository {
         rewriteObj(GITLET_STAGE_REMOVAL, new Stage());
     }
 
+    private void staging(Tree tree, Stage add_stage, Stage rm_stage) {
+        Iterator<String> iterator_add = add_stage.iterator();
+        Iterator<String> iterator_rm = rm_stage.iterator();
+        while (iterator_add.hasNext()) {
+            String nextKey = iterator_add.next();
+            tree.put(nextKey, add_stage.get(nextKey));
+        }
+        while (iterator_rm.hasNext()) {
+            String nextKey = iterator_rm.next();
+            tree.remove(nextKey);
+        }
+    }
     public void rm(String filename) throws IOException {
         Tree headTree = getCommitTree(getHeadCommitId());
         Stage add_stage = readObject(GITLET_STAGE_ADDITION, Stage.class);
-        if (!headTree.containsKey(filename) && !add_stage.containsKey(filename)) {
-            message("No reason to remove the file.");
-            return;
-        }
+        Stage rm_stage = readObject(GITLET_STAGE_REMOVAL, Stage.class);
+        File file = join(CWD, filename);
         /* Unstage the file if it is currently staged for addition */
-        if (add_stage.containsKey(filename)) {
+        if (!headTree.containsKey(filename) && add_stage.containsKey(filename)) {
             add_stage.remove(filename);
         }
         /* Stage the file tracked in the current commit
           for removal and remove it from the working dir */
-        if (headTree.containsKey(filename)) {
-            Stage rm_stage = new Stage();
+        else if (headTree.containsKey(filename) && file.exists()) {
+            rm_stage.put(filename, headTree.get(filename));
+            restrictedDelete(file);
+        } else if (headTree.containsKey(filename) && !file.exists()) {
             rm_stage.put(filename, headTree.get(filename));
             rewriteObj(GITLET_STAGE_REMOVAL, rm_stage);
-            restrictedDelete(join(CWD, filename));
+        } else if (!headTree.containsKey(filename) && !add_stage.containsKey(filename)) {
+            message("No reason to remove the file.");
         }
+        rewriteObj(GITLET_STAGE_REMOVAL, rm_stage);
+        rewriteObj(GITLET_STAGE_ADDITION, add_stage);
     }
 
 
     public void log() {
         String headID = getHeadCommitId();
-        Commit headCommit = readObject(join(GITLET_COMMITS_DIR, headID), Commit.class);
+        Commit headCommit = getCommit(headID);
         printCommit(headCommit, headID);
     }
 
@@ -173,31 +179,37 @@ public class Repository {
             if (parentList.isEmpty()) {
                 return;
             }
-            String parentId = parentList.get(0);
-            Commit parentCommit = readObject(join(GITLET_COMMITS_DIR, parentId), Commit.class);
-            printCommit(parentCommit, parentId);
         } else {
-            String parent_1 = parentList.get(0).substring(0, 6);
-            String parent_2 = parentList.get(1).substring(0, 6);
-            System.out.println("===" + "\n" + "commit " + id + "\n" +
-                    "Merge: " + parent_1 + " " + parent_2 + "\n" +
-                    "Date: " + commit.getTimeStamp() + "\n" +
-                    commit.getMessage() + "\n");
-            String parentId = parentList.get(0);
-            Commit parentCommit = readObject(join(GITLET_COMMITS_DIR, parentId), Commit.class);
-            printCommit(parentCommit, parentId);
+            printCommitsWith2Parents(id, commit, parentList);
         }
+        String parentId = parentList.get(0);
+        Commit parentCommit = getCommit(parentId);
+        printCommit(parentCommit, parentId);
     }
 
     public void global_log() {
         List<String> ids =  plainFilenamesIn(GITLET_COMMITS_DIR);
         assert ids != null;
         for (String s : ids) {
-            Commit commit = readObject(join(GITLET_COMMITS_DIR, s), Commit.class);
-            System.out.println("===" + "\n" + "commit " + s + "\n" +
-                    "Date: " + commit.getTimeStamp() + "\n" +
-                    commit.getMessage() + "\n");
+            Commit commit = getCommit(s);
+            List<String> parentList = commit.getParentList();
+            if (parentList.size() == 2) {
+                printCommitsWith2Parents(s, commit, parentList);
+            } else {
+                System.out.println("===" + "\n" + "commit " + s + "\n" +
+                        "Date: " + commit.getTimeStamp() + "\n" +
+                        commit.getMessage() + "\n");
+            }
         }
+    }
+
+    private void printCommitsWith2Parents(String s, Commit commit, List<String> parentList) {
+        String parent_1 = parentList.get(0).substring(0, 6);
+        String parent_2 = parentList.get(1).substring(0, 6);
+        System.out.println("===" + "\n" + "commit " + s + "\n" +
+                "Merge: " + parent_1 + " " + parent_2 + "\n" +
+                "Date: " + commit.getTimeStamp() + "\n" +
+                commit.getMessage() + "\n");
     }
 
     public void find(String message) {
@@ -205,7 +217,7 @@ public class Repository {
         boolean idx = true;
         assert ids != null;
         for (String s : ids) {
-            Commit commit = readObject(join(GITLET_COMMITS_DIR, s), Commit.class);
+            Commit commit = getCommit(s);
             if (commit.getMessage().equals(message)) {
                 idx = false;
                 System.out.println(s);
@@ -246,7 +258,6 @@ public class Repository {
         for (String s : untrackedFiles) {
             System.out.println(s);
         }
-        System.out.println();
     }
 
     /** Helper method for printing out modified but not staged files */
@@ -316,18 +327,17 @@ public class Repository {
     }
 
     public void reset(String id) throws IOException {
-        List<String> ids =  plainFilenamesIn(GITLET_COMMITS_DIR);
-        assert ids != null;
-        if (!ids.contains(id)) {
-            message("No commit with that id exists.");
-            return;
-        }
         if (!findUntrackedFiles().isEmpty()) {
             message("There is an untracked file in the way; delete it, or add and commit it first.");
             return;
         }
-        replace(id, getHeadCommitId());
-        setHeadCommitId(id);
+        String realID = expandID(id);
+        if (realID == null) {
+            message("No commit with that id exists.");
+            return;
+        }
+        replace(realID, getHeadCommitId());
+        setHeadCommitId(realID);
     }
 
     public void checkout(int i, String branchName, String commitId
@@ -336,15 +346,17 @@ public class Repository {
             case 3 -> {
                 Tree tree = getCommitTree(getHeadCommitId());
                 if (!tree.containsKey(fileName)) {
-                        message("File does not exist in that commit.");
+                    message("File does not exist in that commit.");
                 } else {
                     writeFile(fileName, tree.get(fileName));
                 }
             }
             case 4 -> {
                 Tree tree = getCommitTree(commitId);
-                if (!tree.containsKey(fileName)) {
-                    throw error("File does not exist in that commit.");
+                if (tree.isEmpty()) {
+                    message("No commit with that id exists.");
+                } else if (!tree.containsKey(fileName)) {
+                    message("File does not exist in that commit.");
                 } else {
                     writeFile(fileName, tree.get(fileName));
                 }
@@ -353,8 +365,10 @@ public class Repository {
                 File branch = join(GITLET_REFS_heads, branchName);
                 if (!branch.exists()) {
                     message("No such branch exists.");
+                    return;
                 } else if (readContentsAsString(GITLET_HEAD).equals(branch.toString())) {
                     message("No need to checkout the current branch.");
+                    return;
                 } else if (!findUntrackedFiles().isEmpty()) {
                     message("There is an untracked file in the way; " +
                             "delete it, or add and commit it first.");
@@ -365,18 +379,40 @@ public class Repository {
                 }
                 rewrite(GITLET_HEAD, branch.toString());
             }
-            default -> throw new RuntimeException("Incorrect operands.");
+            default -> message("Incorrect Operand");
         }
     }
 
+
+    /** Helper method for checkout and reset to replace old version with new version */
+    private void replace(String newId, String oldId) {
+        Tree newTree = getCommitTree(newId);
+        Tree oldTree = getCommitTree(oldId);
+        Iterator<String> new_iter = newTree.iterator();
+        Iterator<String> old_iter = oldTree.iterator();
+        while (new_iter.hasNext()) {
+            String s1 = new_iter.next();
+            writeFile(s1, newTree.get(s1));
+        }
+        while (old_iter.hasNext()) {
+            String s2 = old_iter.next();
+            if (!newTree.containsKey(s2)) {
+                restrictedDelete(join(CWD, s2));
+            }
+        }
+    }
+
+
     public void merge(String branchName) throws IOException {
+        File mer_branch = join(GITLET_REFS_heads, branchName);
         Stage add_stage = readObject(GITLET_STAGE_ADDITION, Stage.class);
         Stage rm_stage = readObject(GITLET_STAGE_REMOVAL, Stage.class);
+        String headID = getHeadCommitId();
+        String mergeID = readContentsAsString(mer_branch);
         if (!add_stage.isEmpty() || !rm_stage.isEmpty()) {
             message("You have uncommitted changes.");
             return;
         }
-        File mer_branch = join(GITLET_REFS_DIR, branchName);
         if (!mer_branch.exists()) {
             message("A branch with that name does not exist.");
             return;
@@ -390,25 +426,99 @@ public class Repository {
                     "delete it, or add and commit it first.");
             return;
         }
-        String split = findSplit(getHeadCommitId(), readContentsAsString(mer_branch));
-        if (split.equals(getHeadCommitId())) {
+        String split = findSplit(headID, mergeID);
+        if (split.equals(headID)) {
             checkout(2, branchName, null, null);
             message("Current branch fast-forwarded.");
             return;
         }
-        if (split.equals(readContentsAsString(mer_branch))) {
+        if (split.equals(mergeID)) {
             message("Given branch is an ancestor of the current branch.");
             return;
         }
-        Commit cur_commit = readObject(join(GITLET_COMMITS_DIR, getHeadCommitId()), Commit.class);
-        Commit giv_commit = readObject(join(GITLET_COMMITS_DIR,
-                readContentsAsString(mer_branch)), Commit.class);
-        Commit spl_commit = readObject(join(GITLET_COMMITS_DIR, split), Commit.class);
-        Tree cur_tree = getCommitTree(getHeadCommitId());
-        Tree giv_tree = getCommitTree(readContentsAsString(join(GITLET_REFS_DIR, branchName)));
-
+        Tree cur_tree = getCommitTree(headID);
+        Tree giv_tree = getCommitTree(mergeID);
+        Tree spl_tree = getCommitTree(split);
+        Set<String> set = new HashSet<>(cur_tree.keySet());
+        set.addAll(giv_tree.keySet());
+        set.addAll(spl_tree.keySet());
+        for (String s : set) {
+            if (spl_tree.containsKey(s) && giv_tree.containsKey(s) && cur_tree.containsKey(s)) {
+                String spl = spl_tree.get(s);
+                String cur = cur_tree.get(s);
+                String giv = giv_tree.get(s);
+                if (spl.equals(cur) && !spl.equals(giv)) {
+                    writeFile(s, giv);
+                    add_stage.put(s, giv);
+                } else if (!spl.equals(cur) && !spl.equals(giv) && !giv.equals(cur)) {
+                    conflict(s, cur, giv);
+                }
+            } else if (!spl_tree.containsKey(s) && giv_tree.containsKey(s) && !cur_tree.containsKey(s)) {
+                String giv = giv_tree.get(s);
+                writeFile(s, giv);
+                add_stage.put(s, giv);
+            } else if (spl_tree.containsKey(s) && !giv_tree.containsKey(s) && cur_tree.containsKey(s)) {
+                String spl = spl_tree.get(s);
+                String cur = cur_tree.get(s);
+                if (spl.equals(cur)) {
+                    deleteFile(s);
+                    rm_stage.put(s, spl);
+                } else {
+                    conflict(s, cur, null);
+                }
+            } else if (spl_tree.containsKey(s) && giv_tree.containsKey(s) && !cur_tree.containsKey(s)) {
+                String spl = spl_tree.get(s);
+                String giv = giv_tree.get(s);
+                if (!spl.equals(giv)) {
+                    conflict(s, null, giv);
+                }
+            } else if (!spl_tree.containsKey(s) && giv_tree.containsKey(s) && cur_tree.containsKey(s)) {
+                String giv = giv_tree.get(s);
+                String cur = cur_tree.get(s);
+                if (!cur.equals(giv)) {
+                    conflict(s, cur, giv);
+                }
+            }
+        }
+        if (add_stage.isEmpty() && rm_stage.isEmpty()) {
+            message("No changes added to the commit!");
+            return;
+        }
+        String currBranch = readContentsAsString(GITLET_HEAD);
+        String currBranchName = currBranch.substring(currBranch.lastIndexOf("\\") + 1);
+        Commit mergeCommit = new Commit(dateToTimeStamp(new Date()),
+                "Merged " + branchName + " into " + currBranchName + ".", "payFish", null);
+        staging(cur_tree, add_stage, rm_stage);
+        String treeId = output(GITLET_OBJECTS_DIR, cur_tree);
+        mergeCommit.setTreeId(treeId);
+        mergeCommit.setParentID(headID);
+        mergeCommit.setParentID(mergeID);
+        String commitId = output(GITLET_COMMITS_DIR, mergeCommit);
+        setHeadCommitId(commitId);
+        rewriteObj(GITLET_STAGE_ADDITION, new Stage());
+        rewriteObj(GITLET_STAGE_REMOVAL, new Stage());
     }
 
+    private void conflict(String fileName, String curID, String givID) {
+        File file = join(CWD, fileName);
+        writeContents(file, "<<<<<<< HEAD" + "\n");
+        if (curID != null) {
+            writeContents(file, readContents(join(GITLET_OBJECTS_DIR, curID)) + "\n");
+        }
+        writeContents(file, "=======" + "\n");
+        if (givID != null) {
+            writeContents(file, readContents(join(GITLET_OBJECTS_DIR, givID)) + "\n");
+        }
+        writeContents(file, ">>>>>>>");
+        message("Encountered a merge conflict.");
+    }
+
+    private void deleteFile(String fileName) {
+        restrictedDelete(join(CWD, fileName));
+    }
+
+
+    /** Search the split point of current branch and given branch and return its id */
     private String findSplit(String id1, String id2) {
        Map<String, Integer> m1 = new HashMap<>();
        Map<String, Integer> m2 = new HashMap<>();
@@ -426,8 +536,10 @@ public class Repository {
        return res;
     }
 
+    /** Return a map of the given commits' parent commit */
     private void getParentMap(String id, Map<String, Integer> mp, int depth) {
-        Commit commit = readObject(join(GITLET_COMMITS_DIR, id), Commit.class);
+        Commit commit = getCommit(id);
+        assert commit != null;
         List<String> list = commit.getParentList();
         mp.put(id, depth);
         if (list.isEmpty()) {
@@ -442,25 +554,6 @@ public class Repository {
     }
 
 
-    /** Helper method for checkout and reset to replace old version with new version */
-    private void replace(String newId, String oldId) {
-        Tree oldTree = getCommitTree(oldId);
-        Tree newTree = getCommitTree(newId);
-        Iterator<String> new_iter = newTree.iterator();
-        Iterator<String> old_iter = oldTree.iterator();
-        while (new_iter.hasNext()) {
-            String s1 = new_iter.next();
-            writeFile(s1, newTree.get(s1));
-        }
-        while (old_iter.hasNext()) {
-            String s2 = old_iter.next();
-            if (!newTree.containsKey(s2)) {
-                restrictedDelete(join(CWD, s2));
-            }
-        }
-    }
-
-
     /** Find out is there still any untracked files in the working dir and staging area */
     private List<String> findUntrackedFiles() {
         Stage add_stage = readObject(GITLET_STAGE_ADDITION, Stage.class);
@@ -468,12 +561,15 @@ public class Repository {
         List<String> fileList = plainFilenamesIn(CWD);
         List<String> untrackedFiles = new ArrayList<>();
         Tree currentTree = getCommitTree(getHeadCommitId());
-        for (String fileName : fileList) {
-            if (!currentTree.containsKey(fileName) && !add_stage.containsKey(fileName) ||
-                    rm_stage.containsKey(fileName)) {
-                untrackedFiles.add(fileName);
+        if (fileList != null) {
+            for (String fileName : fileList) {
+                if (!currentTree.containsKey(fileName) && !add_stage.containsKey(fileName) ||
+                        rm_stage.containsKey(fileName)) {
+                    untrackedFiles.add(fileName);
+                }
             }
         }
+
         return untrackedFiles;
     }
 
@@ -541,15 +637,37 @@ public class Repository {
         rewrite(headFile, id);
     }
 
+    /** Return the 40-length commit id or "" */
+    private String expandID(String id) {
+        List<String> ids =  plainFilenamesIn(GITLET_COMMITS_DIR);
+        if (id.length() < 40) {
+            assert ids != null;
+            for (String _id : ids) {
+                if (_id.contains(id)) {
+                    return _id;
+                }
+            }
+        } else {
+            return id;
+        }
+        return null;
+    }
+    private Commit getCommit(String id) {
+        String realID = expandID(id);
+        if (realID == null) {
+            return null;
+        }
+        return readObject(join(GITLET_COMMITS_DIR, realID), Commit.class);
+    }
+
     /** Return the tree of the given commit */
-    private Tree getCommitTree(String CommitId) {
-        Commit commit = readObject(join(GITLET_COMMITS_DIR, CommitId), Commit.class);
+    private Tree getCommitTree(String id) {
+        Commit commit = getCommit(id);
         if (commit == null) {
-            throw error("No commit with that id exists.");
+            return new Tree();
         }
         String treeId = commit.getTreeId();
         if (treeId == null) {
-//            throw error("No tree exists in this commit.");
             return new Tree();
         }
         return readObject(join(GITLET_OBJECTS_DIR, treeId), Tree.class);
