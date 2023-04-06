@@ -39,7 +39,7 @@ public class Repository {
 
 
 
-    public void init() throws IOException {
+    public void init()  {
         if (GITLET_DIR.exists()) {
             message("A Gitlet version-control system " +
                     "already exists in the current directory.");
@@ -52,14 +52,22 @@ public class Repository {
             File branchMaster = join(GITLET_REFS_heads, "master");
             writeContents(branchMaster, sha1Id); // crate a new branch named master
             writeContents(GITLET_HEAD, branchMaster.toString());
-            GITLET_STAGE_ADDITION.createNewFile();
-            GITLET_STAGE_REMOVAL.createNewFile();
+            try {
+                GITLET_STAGE_ADDITION.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                GITLET_STAGE_REMOVAL.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             writeObject(GITLET_STAGE_ADDITION, new Stage());
             writeObject(GITLET_STAGE_REMOVAL, new Stage());
         }
     }
 
-    public void add(String fileName) throws IOException {
+    public void add(String fileName)  {
         if (!join(CWD, fileName).exists()) {
             message("File does not exist.");
             return;
@@ -96,7 +104,7 @@ public class Repository {
     }
 
 
-    public void commit(String message) throws IOException {
+    public void commit(String message)  {
         Stage add_stage = readObject(GITLET_STAGE_ADDITION, Stage.class);
         Stage rm_stage = readObject(GITLET_STAGE_REMOVAL, Stage.class);
         if (add_stage.isEmpty() && rm_stage.isEmpty()) {
@@ -136,7 +144,7 @@ public class Repository {
             tree.remove(nextKey);
         }
     }
-    public void rm(String filename) throws IOException {
+    public void rm(String filename)  {
         Tree headTree = getCommitTree(getHeadCommitId());
         Stage add_stage = readObject(GITLET_STAGE_ADDITION, Stage.class);
         Stage rm_stage = readObject(GITLET_STAGE_REMOVAL, Stage.class);
@@ -304,7 +312,7 @@ public class Repository {
         }
     }
 
-    public void branch(String branchName) throws IOException {
+    public void branch(String branchName)  {
         File newBranch = join(GITLET_REFS_heads, branchName);
         if (newBranch.exists()) {
             message("A branch with that name already exists.");
@@ -326,7 +334,7 @@ public class Repository {
         branch2del.delete();
     }
 
-    public void reset(String id) throws IOException {
+    public void reset(String id)  {
         if (!findUntrackedFiles().isEmpty()) {
             message("There is an untracked file in the way; delete it, or add and commit it first.");
             return;
@@ -341,7 +349,7 @@ public class Repository {
     }
 
     public void checkout(int i, String branchName, String commitId
-            , String fileName) throws IOException {
+            , String fileName) {
         switch (i) {
             case 3 -> {
                 Tree tree = getCommitTree(getHeadCommitId());
@@ -403,7 +411,7 @@ public class Repository {
     }
 
 
-    public void merge(String branchName) throws IOException {
+    public void merge(String branchName)  {
         File mer_branch = join(GITLET_REFS_heads, branchName);
         Stage add_stage = readObject(GITLET_STAGE_ADDITION, Stage.class);
         Stage rm_stage = readObject(GITLET_STAGE_REMOVAL, Stage.class);
@@ -606,20 +614,14 @@ public class Repository {
     }
 
     /** Helper method for rewriting String into a file */
-    private void rewrite(File file, String id) throws IOException {
-        FileWriter fileWriter = new FileWriter(file);
-        fileWriter.write("");
-        fileWriter.flush();
-        fileWriter.close();
+    private void rewrite(File file, String id)  {
+        writeContents(file, "");
         writeContents(file, id);
     }
 
     /** Helper method for rewriting an object into a file */
-    private void rewriteObj(File file, Serializable obj) throws IOException {
-        FileWriter fileWriter = new FileWriter(file);
-        fileWriter.write("");
-        fileWriter.flush();
-        fileWriter.close();
+    private void rewriteObj(File file, Serializable obj)  {
+        writeContents(file, "");
         writeObject(file, obj);
     }
 
@@ -631,7 +633,7 @@ public class Repository {
     }
 
     /** Save the head commits' id into the GITLET_HEAD file */
-    private void setHeadCommitId(String id) throws IOException {
+    private void setHeadCommitId(String id)  {
         String head = readContentsAsString(GITLET_HEAD);
         File headFile = new File(head);
         rewrite(headFile, id);

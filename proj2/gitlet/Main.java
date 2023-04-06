@@ -1,7 +1,6 @@
 package gitlet;
 
 import java.io.IOException;
-import java.util.*;
 
 import static gitlet.Utils.*;
 
@@ -10,8 +9,9 @@ import static gitlet.Utils.*;
  */
 public class Main {
 
-    public static void main(String[] args) throws IOException {
-        if (args.length == 0) {
+    public static void main(String[] args)  {
+        int n = args.length;
+        if (n == 0) {
             message("Please enter a command.");
             return;
         }
@@ -27,7 +27,7 @@ public class Main {
                 repository.add(args[1]);
                 break;
             case "commit":
-                if (args.length == 1) {
+                if (n == 1) {
                     repository.commit(null);
                 } else {
                     repository.commit(args[1]);
@@ -54,7 +54,6 @@ public class Main {
                 repository.status();
                 break;
             case "checkout":
-                int n = args.length;
                 if (n == 2) {
                     repository.checkout(n, args[1], null, null);
                 } else {
