@@ -4,9 +4,10 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class Stage implements Serializable {
-    private final Map<String, String> map = new HashMap<>();
+    private final Map<String, String> map = new TreeMap<>();
 
     public void put(String filename, String id) {
         map.put(filename, id);
