@@ -54,19 +54,7 @@ public class Main {
                 repository.status();
                 break;
             case "checkout":
-                if (n == 2) {
-                    repository.checkout(n, args[1], null, null);
-                } else {
-                    if (!args[n - 2].equals("--")) {
-                        message("Incorrect operands.");
-                        break;
-                    }
-                    if (n == 3) {
-                        repository.checkout(n, null, null, args[2]);
-                    } else if (n == 4) {
-                        repository.checkout(n, null, args[1], args[3]);
-                    }
-                }
+                repository.checkout(args);
                 break;
             case "branch":
                 repository.validateNumArgs("branch", args, 2);
