@@ -1,6 +1,0 @@
-<<<<<<< HEAD
-[B@4dcbadb4
-=======
-This is not a wug.
-
->>>>>>>

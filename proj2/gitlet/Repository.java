@@ -69,6 +69,7 @@ public class Repository {
     }
 
     public void add(String fileName)  {
+        checkIfInit();
         if (!join(CWD, fileName).exists()) {
             message("File does not exist.");
             return;
@@ -136,13 +137,13 @@ public class Repository {
     private void staging(Tree tree, Stage add_stage, Stage rm_stage) {
         Iterator<String> iterator_add = add_stage.iterator();
         Iterator<String> iterator_rm = rm_stage.iterator();
-        while (iterator_add.hasNext()) {
-            String nextKey = iterator_add.next();
-            tree.put(nextKey, add_stage.get(nextKey));
-        }
         while (iterator_rm.hasNext()) {
             String nextKey = iterator_rm.next();
             tree.remove(nextKey);
+        }
+        while (iterator_add.hasNext()) {
+            String nextKey = iterator_add.next();
+            tree.put(nextKey, add_stage.get(nextKey));
         }
     }
     public void rm(String filename)  {
@@ -308,7 +309,7 @@ public class Repository {
             }
             //Not staged for removal, but tracked in the current
             // commit and deleted from the working directory
-            else if (!rm_stage.containsKey(fileName) && !join(CWD, fileName).exists()) {
+            if (!rm_stage.containsKey(fileName) && !join(CWD, fileName).exists()) {
                 deleted.add(fileName);
             }
         }
@@ -321,7 +322,7 @@ public class Repository {
                 modified.add(fileName);
             }
             //Staged for addition, but deleted in the working directory
-            else if (!join(CWD, fileName).exists()) {
+            if (!join(CWD, fileName).exists()) {
                 deleted.add(fileName);
             }
         }
@@ -367,6 +368,9 @@ public class Repository {
         }
         replace(realID, getHeadCommitId());
         setHeadCommitId(realID);
+        rewriteObj(GITLET_STAGE_ADDITION, new Stage());
+        rewriteObj(GITLET_STAGE_REMOVAL, new Stage());
+
     }
 
     public void checkout(int i, String branchName, String commitId
@@ -418,16 +422,18 @@ public class Repository {
         Tree newTree = getCommitTree(newId);
         Tree oldTree = getCommitTree(oldId);
         Iterator<String> new_iter = newTree.iterator();
-        Iterator<String> old_iter = oldTree.iterator();
+//        Iterator<String> old_iter = oldTree.iterator();
+//        while (old_iter.hasNext()) {
+//            String s2 = old_iter.next();
+//            restrictedDelete(join(CWD, s2));
+//        }
+        List<String> list = plainFilenamesIn(CWD);
+        for (String l : list) {
+            restrictedDelete(join(CWD, l));
+        }
         while (new_iter.hasNext()) {
             String s1 = new_iter.next();
             writeFile(s1, newTree.get(s1));
-        }
-        while (old_iter.hasNext()) {
-            String s2 = old_iter.next();
-            if (!newTree.containsKey(s2)) {
-                restrictedDelete(join(CWD, s2));
-            }
         }
     }
 
@@ -482,6 +488,8 @@ public class Repository {
                     add_stage.put(s, giv);
                 } else if (!spl.equals(cur) && !spl.equals(giv) && !giv.equals(cur)) {
                     conflict(s, cur, giv);
+                    rm_stage.put(s, cur);
+                    add_stage.put(s, sha1(serialize(makeBlob(s))));
                     index = true;
                 }
             } else if (!spl_tree.containsKey(s) && giv_tree.containsKey(s) && !cur_tree.containsKey(s)) {
@@ -496,6 +504,8 @@ public class Repository {
                     rm_stage.put(s, spl);
                 } else {
                     conflict(s, cur, null);
+                    rm_stage.put(s, cur);
+                    add_stage.put(s, sha1(serialize(makeBlob(s))));
                     index = true;
                 }
             } else if (spl_tree.containsKey(s) && giv_tree.containsKey(s) && !cur_tree.containsKey(s)) {
@@ -503,6 +513,7 @@ public class Repository {
                 String giv = giv_tree.get(s);
                 if (!spl.equals(giv)) {
                     conflict(s, null, giv);
+                    add_stage.put(s, sha1(serialize(makeBlob(s))));
                     index = true;
                 }
             } else if (!spl_tree.containsKey(s) && giv_tree.containsKey(s) && cur_tree.containsKey(s)) {
@@ -510,6 +521,8 @@ public class Repository {
                 String cur = cur_tree.get(s);
                 if (!cur.equals(giv)) {
                     conflict(s, cur, giv);
+                    rm_stage.put(s, cur);
+                    add_stage.put(s, sha1(serialize(makeBlob(s))));
                     index = true;
                 }
             }
@@ -602,8 +615,8 @@ public class Repository {
         Tree currentTree = getCommitTree(getHeadCommitId());
         if (fileList != null) {
             for (String fileName : fileList) {
-                if (!currentTree.containsKey(fileName) && !add_stage.containsKey(fileName) ||
-                        rm_stage.containsKey(fileName)) {
+                if (!currentTree.containsKey(fileName) && !add_stage.containsKey(fileName)
+                        || rm_stage.containsKey(fileName)) {
                     untrackedFiles.add(fileName);
                 }
             }
@@ -615,10 +628,7 @@ public class Repository {
     private void writeFile(String fileName, String id) {
         Blob blob = readObject(join(GITLET_OBJECTS_DIR, id), Blob.class);
         File f = join(CWD, fileName);
-        if (f.exists()) {
-            restrictedDelete(f);
-        }
-        writeContents(f, blob.getContents());
+        writeContents(f, new String(blob.getContents(), StandardCharsets.UTF_8));
     }
 
     /**
@@ -651,14 +661,15 @@ public class Repository {
 
     /** Helper method for rewriting an object into a file */
     private void rewriteObj(File file, Serializable obj)  {
-        try {
-            FileWriter fw = new FileWriter(file);
-            fw.flush();
-            fw.write("");
-            fw.close();
-        } catch (IOException excp) {
-            throw error("File writer error.\n" + excp.getMessage());
-        }
+//        try {
+//            FileWriter fw = new FileWriter(file);
+//            fw.flush();
+//            fw.write("");
+//            fw.close();
+//        } catch (IOException excp) {
+//            throw error("File writer error.\n" + excp.getMessage());
+//        }
+        writeContents(file, "");
         writeObject(file, obj);
     }
 
