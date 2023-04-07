@@ -279,7 +279,14 @@ public class Repository {
 
     private String getCurrBranchName() {
         String currBranch = readContentsAsString(GITLET_HEAD);
-        return currBranch.substring(currBranch.lastIndexOf(System.getProperty("file.separator")) + 1);
+        List<String> names = plainFilenamesIn(GITLET_REFS_heads);
+//        return currBranch.substring(currBranch.lastIndexOf(System.getProperty("file.separator")) + 1);
+        for (String name : names) {
+            if (currBranch.endsWith(name)) {
+                return name;
+            }
+        }
+        return null;
     }
 
     /** Helper method for printing out modified but not staged files */
