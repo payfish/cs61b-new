@@ -237,11 +237,9 @@ public class Repository {
     }
 
     public void status() {
-        String currBranch = readContentsAsString(GITLET_HEAD);
-        String currBranchName = currBranch.substring(currBranch.lastIndexOf("\\") + 1);
         List<String> branchList = plainFilenamesIn(GITLET_REFS_heads);
+        String currBranchName = getCurrBranchName();
         System.out.println("=== Branches ===" + "\n" + "*" + currBranchName);
-        assert branchList != null;
         for (String s : branchList) {
             if (!s.equals(currBranchName)) {
                 System.out.println(s);
@@ -266,6 +264,19 @@ public class Repository {
         for (String s : untrackedFiles) {
             System.out.println(s);
         }
+    }
+
+    private String getCurrBranchName() {
+        String currBranch = readContentsAsString(GITLET_HEAD);
+        int n = currBranch.length();
+        List<String> branchList = plainFilenamesIn(GITLET_REFS_heads);
+        assert branchList != null;
+        for (String s : branchList) {
+            if (currBranch.contains(s) && currBranch.substring(n - s.length()).equals(s)) {
+                return s;
+            }
+        }
+        return null;
     }
 
     /** Helper method for printing out modified but not staged files */
@@ -450,6 +461,7 @@ public class Repository {
         Set<String> set = new HashSet<>(cur_tree.keySet());
         set.addAll(giv_tree.keySet());
         set.addAll(spl_tree.keySet());
+        Boolean index = false;
         for (String s : set) {
             if (spl_tree.containsKey(s) && giv_tree.containsKey(s) && cur_tree.containsKey(s)) {
                 String spl = spl_tree.get(s);
@@ -460,6 +472,7 @@ public class Repository {
                     add_stage.put(s, giv);
                 } else if (!spl.equals(cur) && !spl.equals(giv) && !giv.equals(cur)) {
                     conflict(s, cur, giv);
+                    index = true;
                 }
             } else if (!spl_tree.containsKey(s) && giv_tree.containsKey(s) && !cur_tree.containsKey(s)) {
                 String giv = giv_tree.get(s);
@@ -473,18 +486,21 @@ public class Repository {
                     rm_stage.put(s, spl);
                 } else {
                     conflict(s, cur, null);
+                    index = true;
                 }
             } else if (spl_tree.containsKey(s) && giv_tree.containsKey(s) && !cur_tree.containsKey(s)) {
                 String spl = spl_tree.get(s);
                 String giv = giv_tree.get(s);
                 if (!spl.equals(giv)) {
                     conflict(s, null, giv);
+                    index = true;
                 }
             } else if (!spl_tree.containsKey(s) && giv_tree.containsKey(s) && cur_tree.containsKey(s)) {
                 String giv = giv_tree.get(s);
                 String cur = cur_tree.get(s);
                 if (!cur.equals(giv)) {
                     conflict(s, cur, giv);
+                    index = true;
                 }
             }
         }
@@ -492,8 +508,10 @@ public class Repository {
             message("No changes added to the commit!");
             return;
         }
-        String currBranch = readContentsAsString(GITLET_HEAD);
-        String currBranchName = currBranch.substring(currBranch.lastIndexOf("\\") + 1);
+        if (index) {
+            message("Encountered a merge conflict.");
+        }
+        String currBranchName = getCurrBranchName();
         Commit mergeCommit = new Commit(dateToTimeStamp(new Date()),
                 "Merged " + branchName + " into " + currBranchName + ".", "payFish", null);
         staging(cur_tree, add_stage, rm_stage);
@@ -511,14 +529,13 @@ public class Repository {
         File file = join(CWD, fileName);
         writeContents(file, "<<<<<<< HEAD" + "\n");
         if (curID != null) {
-            writeContents(file, readContents(join(GITLET_OBJECTS_DIR, curID)) + "\n");
+            writeContents(file, readContentsAsString(join(GITLET_OBJECTS_DIR, curID)) + "\n");
         }
         writeContents(file, "=======" + "\n");
         if (givID != null) {
-            writeContents(file, readContents(join(GITLET_OBJECTS_DIR, givID)) + "\n");
+            writeContents(file, readContentsAsString(join(GITLET_OBJECTS_DIR, givID)) + "\n");
         }
         writeContents(file, ">>>>>>>");
-        message("Encountered a merge conflict.");
     }
 
     private void deleteFile(String fileName) {
@@ -621,7 +638,14 @@ public class Repository {
 
     /** Helper method for rewriting an object into a file */
     private void rewriteObj(File file, Serializable obj)  {
-        writeContents(file, "");
+        try {
+            FileWriter fw = new FileWriter(file);
+            fw.flush();
+            fw.write("");
+            fw.close();
+        } catch (IOException excp) {
+            throw error("File writer error.\n" + excp.getMessage());
+        }
         writeObject(file, obj);
     }
 
@@ -650,10 +674,15 @@ public class Repository {
                 }
             }
         } else {
-            return id;
+            if (!ids.contains(id)) {
+                return null;
+            } else {
+                return id;
+            }
         }
         return null;
     }
+
     private Commit getCommit(String id) {
         String realID = expandID(id);
         if (realID == null) {
