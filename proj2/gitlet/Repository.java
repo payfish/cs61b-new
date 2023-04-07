@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -212,8 +213,8 @@ public class Repository {
     }
 
     private void printCommitsWith2Parents(String s, Commit commit, List<String> parentList) {
-        String parent_1 = parentList.get(0).substring(0, 6);
-        String parent_2 = parentList.get(1).substring(0, 6);
+        String parent_1 = parentList.get(0).substring(0, 7);
+        String parent_2 = parentList.get(1).substring(0, 7);
         System.out.println("===" + "\n" + "commit " + s + "\n" +
                 "Merge: " + parent_1 + " " + parent_2 + "\n" +
                 "Date: " + commit.getTimeStamp() + "\n" +
@@ -236,7 +237,16 @@ public class Repository {
         }
     }
 
+    private void checkIfInit() {
+         if (!GITLET_DIR.exists()) {
+             message("Not in an initialized Gitlet directory.");
+             System.exit(0);
+         }
+    }
+
+
     public void status() {
+        checkIfInit();
         List<String> branchList = plainFilenamesIn(GITLET_REFS_heads);
         String currBranchName = getCurrBranchName();
         System.out.println("=== Branches ===" + "\n" + "*" + currBranchName);
@@ -264,19 +274,12 @@ public class Repository {
         for (String s : untrackedFiles) {
             System.out.println(s);
         }
+        System.out.println();
     }
 
     private String getCurrBranchName() {
         String currBranch = readContentsAsString(GITLET_HEAD);
-        int n = currBranch.length();
-        List<String> branchList = plainFilenamesIn(GITLET_REFS_heads);
-        assert branchList != null;
-        for (String s : branchList) {
-            if (currBranch.contains(s) && currBranch.substring(n - s.length()).equals(s)) {
-                return s;
-            }
-        }
-        return null;
+        return currBranch.substring(currBranch.lastIndexOf(System.getProperty("file.separator")) + 1);
     }
 
     /** Helper method for printing out modified but not staged files */
@@ -427,7 +430,6 @@ public class Repository {
         Stage add_stage = readObject(GITLET_STAGE_ADDITION, Stage.class);
         Stage rm_stage = readObject(GITLET_STAGE_REMOVAL, Stage.class);
         String headID = getHeadCommitId();
-        String mergeID = readContentsAsString(mer_branch);
         if (!add_stage.isEmpty() || !rm_stage.isEmpty()) {
             message("You have uncommitted changes.");
             return;
@@ -445,6 +447,7 @@ public class Repository {
                     "delete it, or add and commit it first.");
             return;
         }
+        String mergeID = readContentsAsString(mer_branch);
         String split = findSplit(headID, mergeID);
         if (split.equals(headID)) {
             checkout(2, branchName, null, null);
@@ -529,13 +532,17 @@ public class Repository {
         File file = join(CWD, fileName);
         writeContents(file, "<<<<<<< HEAD" + "\n");
         if (curID != null) {
-            writeContents(file, readContentsAsString(join(GITLET_OBJECTS_DIR, curID)) + "\n");
+            writeContents(file, readContentsAsString(file),
+                    new String(readObject(join(GITLET_OBJECTS_DIR, curID), Blob.class).getContents(),
+                            StandardCharsets.UTF_8));
         }
-        writeContents(file, "=======" + "\n");
+        writeContents(file, readContentsAsString(file), "=======" + "\n");
         if (givID != null) {
-            writeContents(file, readContentsAsString(join(GITLET_OBJECTS_DIR, givID)) + "\n");
+            writeContents(file, readContentsAsString(file),
+                    new String(readObject(join(GITLET_OBJECTS_DIR, givID), Blob.class).getContents(),
+                            StandardCharsets.UTF_8));
         }
-        writeContents(file, ">>>>>>>");
+        writeContents(file, readContentsAsString(file) + ">>>>>>>" + "\n");
     }
 
     private void deleteFile(String fileName) {
@@ -594,7 +601,6 @@ public class Repository {
                 }
             }
         }
-
         return untrackedFiles;
     }
 
