@@ -34,6 +34,8 @@ public class Repository {
 
     public static final File GITLET_HEAD = join(GITLET_DIR, "HEAD");
 
+    public static final File GITLET_AUTHOR = join(GITLET_DIR, "AUTHOR");
+
 
 
 
@@ -52,12 +54,17 @@ public class Repository {
         GITLET_COMMITS_DIR.mkdirs();
         GITLET_REFS_HEADS.mkdirs();
         Commit commit = new Commit(dateToTimeStamp(new Date(0)),
-                "initial commit", "payfish", null);
+                "initial commit", getAuthor(), null);
         String sha1Id = output(GITLET_COMMITS_DIR, commit);
         File branchMaster = join(GITLET_REFS_HEADS, "master");
         writeContents(branchMaster, sha1Id); // crate a new branch named master
         writeContents(GITLET_HEAD, branchMaster.toString());
+        writeContents(GITLET_AUTHOR, "PayFish");
         refreshStage();
+    }
+
+    private String getAuthor() {
+        return readContentsAsString(GITLET_AUTHOR);
     }
 
 
@@ -529,7 +536,7 @@ public class Repository {
         }
         String currBranchName = getCurrBranchName();
         Commit mergeCommit = new Commit(dateToTimeStamp(new Date()),
-                "Merged " + branchName + " into " + currBranchName + ".", "payFish", null);
+                "Merged " + branchName + " into " + currBranchName + ".", getAuthor(), null);
         staging(cur_tree, add_stage, rm_stage);
         String treeId = output(GITLET_OBJECTS_DIR, cur_tree);
         mergeCommit.setTreeId(treeId);
